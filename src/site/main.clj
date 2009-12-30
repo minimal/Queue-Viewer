@@ -1,6 +1,7 @@
-(use 'compojure)
-(use 'clojure.contrib.json.write)
-(use 'com.github.icylisper.rabbitmq)
+(ns site.main
+  (:use [compojure])
+  (:use [clojure.contrib.json.write]))
+;; (use 'com.github.icylisper.rabbitmq)
 ;; (use 'rabbit)
 
 
@@ -75,6 +76,7 @@
   (ANY "*"
        (page-not-found)))
 
-(run-server {:port 8080}
-            "/*" (servlet queue-viewer))
+(defn do-run-server []
+  (run-server {:port 8080}
+              "/*" (servlet queue-viewer)))
 
