@@ -1,10 +1,27 @@
 (use 'compojure)
 (use 'clojure.contrib.json.write)
+(use 'com.github.icylisper.rabbitmq)
+;; (use 'rabbit)
 
-"AMQP live queue viewer
 
-Chris McDevitt
-"
+;; "AMQP live queue viewer
+
+;; Chris McDevitt
+;; "
+;; ;; amqp part
+
+;; (defn producer [producer-num cnt]
+;;   (rabbit/with-amqp
+;;    {}
+;;    (let [start-time now]
+;;      (dotimes [ii cnt]
+;;        (object-publish [ii (Date.)]))
+;;      (log-producer-stat producer-num cnt start-time (now)))))
+
+
+
+;; compojure part
+
 
 (defn html-doc 
   [title & body] 
@@ -23,7 +40,7 @@ Chris McDevitt
      (javascript-tag " $(document).ready(function() {viewer.init();});")] 
       [:body#doc.yui-t4
        [:div#hd 
-        [:h1 "Header"]]
+        [:h1 "AMQP Message Viewer"]]
        [:div#bd
         [:div#yui-main
          [:div.yui-b
@@ -39,28 +56,22 @@ Chris McDevitt
 (defn poll-queue-for-messages
   "Return any new messages as a json array"
   [id]
-  (json-str [{:msg "I am the message" :id id}]))
+  (json-str [{:msg (str "I am message: " (rand-int 50)) :id id}]))
 
 (defroutes queue-viewer
   (GET "/"
        (html-doc "Welcome"
-                 [:p
-                  "this is the start page of my amazin app"]
-                 [:p [:a#newmsgButton {:href "#"} "Get new messages"]]
-                 [:div#entries [:ul "messages go here"]]))
+                 [:div#controls 
+                  [:p
+                   "this is the start page of my amazin app"]
+                  [:p [:a#newmsgButton {:href "#"} "Get new messages"]]]
+                 [:div#entries [:p.message "messages go here"]]))
+
   (GET "/queue/:id" [{:headers {"Content-Type" "application/json"}}]
        (poll-queue-for-messages (Integer. (params :id))))
-  (GET "/foo/:moo"
-       (html [:title "hello from foo with " (params :moo)]
-             [:h1#foo.moo "what the hell is this?"]
-             [:ul 
-              [:li "an item"]
-              [:li "another item"]
-              [:li  ( params :moo)]
-              [:li [:a {:href "/"} "go back"]]
-              (map (fn [x] [:li x])
-                   ["hello" "what is this" "when will" "it end?"])]))
+
   (GET "/public/*" (or (serve-file "c:/Users/chris/Documents/code/clojure/queue-viewer/public" (params :*)) :next))
+  (GET "/favicon.ico" 404)
   (ANY "*"
        (page-not-found)))
 

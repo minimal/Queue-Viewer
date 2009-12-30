@@ -1,5 +1,18 @@
+#hd h1 {
+    font-size: 3em;
+}
 
 #hd, #bd, #entries {
     padding: 10px;
+    border: solid;
+}
+
+#controls {
+    padding: 5px;
+}
+
+.message {
+    padding: 5px;
+    border: solid;
 }
 

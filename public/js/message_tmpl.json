@@ -1,0 +1,4 @@
+
+function  message (data) {
+  return ["%p.message", data.msg]
+};
