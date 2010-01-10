@@ -104,7 +104,7 @@
      (let [consumer (declare-queue-and-consumer
                      ch (:queue c)
                      prefetch)]
-       (.basicConsume ch (:queue c) false consumer)
+       (.basicConsume ch (:queue c) consumer)
        (while true
               (let [d (.nextDelivery consumer)
                     m (String. (.getBody d))]
@@ -118,7 +118,7 @@
      (let [consumer (declare-queue-and-consumer
                      ch (:queue c)
                      prefetch)]
-        (.basicConsume ch (:queue c) false consumer)
+        (.basicConsume ch (:queue c) true consumer)
         (let [d (.nextDelivery consumer)
               m (String. (.getBody d))]
           m)))
@@ -191,6 +191,8 @@
   [queueName exchange routing-key]
   (let [channel (declare-queue queueName exchange routing-key)]
       (consume-poll basic-conn-map channel)))
+
+;; (consume-poll mymap ((connect mymap) 1) {:prefetch 1}) 
 ;; compojure part
 
 ;; ========= Views =========
@@ -219,12 +221,9 @@
         [:div#yui-main
          [:div.yui-b
           [:div.yui-g
-           [:h2 
-            ;; Pass a map as the first argument to be set as attributes of the element
-            [:a {:href "/"} "Home"]]
            body]]] 
         [:div.yui-b
-         [:p "Navigation"]]]]]))
+         [:div#sidebar ""]]]]]))
 
 
 ;; ========= Controllers =========
@@ -266,12 +265,6 @@
 (defroutes queue-viewer
   (GET "/"
        (html-doc "Welcome"
-                 [:div#controls 
-                  ;;[:p
-                  ;; "this is the start page of my amazin app"]
-                  [:p [:div#newmsgButton {:style "cursor: pointer "} "Get new messages"]]
-                  [:p [:div#sendmsgButton {:style "cursor: pointer "} "Send new message"]]
-                  [:p [:a#newqButton {:href "#/queue/boo7"} "new queue"]]]
                  [:div#main]))
   
   (GET "/queue/:id" [{:headers {"Content-Type" "application/json"}}]
@@ -280,7 +273,7 @@
        (setup-queue (params :routing-key) (params :exchange)))
   (POST "/message"
         (publish-once (params :routing-key) (params :exchange)))
-  (GET "/public/*" (or (serve-file "c:/Users/chris/Documents/code/clojure/queue-viewer/public" (params :*)) :next))
+  (GET "/public/*" (or (serve-file "/home/chris/code/git/queue-viewer/public/" (params :*)) :next))
   (GET "/favicon.ico" 404)
   (ANY "*"
        (page-not-found)))
