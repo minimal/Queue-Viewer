@@ -60,7 +60,7 @@ var viewer = function() {
             $.each(data, function (i, msg) { 
               $('.queue_title').after($('<p/>').haml(message(msg)).html());
             });
-            console.log("got data");
+              //console.log("got data");
             retry('reset');
           }
           else {
@@ -117,7 +117,28 @@ var viewer = function() {
            }
     );
   }
-
+  
+  function setupQueue(routing_key, exchange, queue_name, app) {
+    $.ajax({
+      url: "queue",
+      type: "PUT",
+      dataType: "json",
+      data: {exchange: exchange,
+             'routing-key': routing_key,
+             "queue-name": queue_name},
+      success: function (data) {
+        //called when successful
+        console.log(data);
+        app.setLocation("#/");
+        $('#queue_list').haml(queue_button({queue_name: data["queue-id"]}));
+      },
+      error: function () {
+        //called when there is an error
+       }   
+           }
+    );
+  }
+  
   function initQueueButton(selector) {
     // Bind a button to poll the queue
     $(selector).live('click', function () {
@@ -141,11 +162,14 @@ var viewer = function() {
     function initSammy() {
       var app = $.sammy(function() {
       with(this) {
+        element_selector = '#main';
           //console.log('initing sammy');
           get('#/', function() {
               $('#main').html('');
               // $('#sidebar').haml(controls);
               });
+
+        
         //corresponds to routes such as #/section/1	
         get('#/queue/:queue', function() {
                       with(this) {
@@ -153,12 +177,32 @@ var viewer = function() {
               // do something
                   startQueue(params['queue']);
                   $('title').html('Monitoring queue: ' + params['queue']);
+                   trigger("changed");
                 //console.log("queue: "+ params['queue']);
+              log(app.getLocation());              
             });
           }
         });
-      }
-    });
+
+        get('#/new_queue', function(context) {
+          with(this) {
+            $('#main').html('');
+            $('title').html('New queue');
+            $('#main').haml(new_queue);
+            trigger("changed"); // bind form to app
+          }
+        });
+        
+        put('#/new_queue', function(context) {
+          with(this) {
+            log("posting:" + context);
+            setupQueue(params["routing_key"], params["exchange"], params["queue_name"], app);
+            //app.setLocation("#/");
+            //return false
+          }
+        });
+        
+    } } );
     return app;
   }
 

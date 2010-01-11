@@ -2,6 +2,10 @@
     font-size: 2em;
 }
 
+a:visited h1 {
+    color: black;
+}
+
 h2 {
     font-weight: bold;
 }
@@ -11,8 +15,12 @@ h2 {
     border: 1px solid #B3B3B3;
 }
 
-#entries {
+#main {
     padding: 10px;
+}
+
+#entries {
+    padding: 0px;
     //border: 1px solid #E3E3E3;
 }
 
@@ -32,6 +40,11 @@ h2 {
     border-right:1px solid #E6E6E6;
     overflow:hidden;
     padding:7px 8px;
+}
+
+td {
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 td.date {
@@ -64,7 +77,7 @@ td.date {
     -moz-background-clip:border;
     -moz-background-inline-policy:continuous;
     -moz-background-origin:padding;
-    background:transparent url(/images/sidebar-h2.gif) no-repeat scroll left center;
+    //background:transparent url(/images/sidebar-h2.gif) no-repeat scroll left center;
     border-bottom:1px solid #758A97;
     border-top:1px solid #758A97;
     color:#222222;

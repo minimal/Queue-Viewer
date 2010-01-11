@@ -185,6 +185,7 @@
                    :queue queueName
                    :type "topic")]
     (bind-channel mappings channel)
+    (disconnect channel conn)
     channel))
 
 (defn do-consume-poll
@@ -207,16 +208,17 @@
      [:title title]
      ;[:link {:type "text/css" :href "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" :rel "stylesheet"}]
      (include-css  "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css"
-                   "/public/css/main.css")
+                   "/public/css/main.css"
+                   "/public/css/form.css")
      (include-js "/public/js/jquery-1.3.2.min.js"
                  "/public/js/jquery.haml-1.3.js"
                  "/public/js/sammy.js"
                  "/public/js/message.js"
                  "/public/js/viewer.js")
-     (javascript-tag " $(document).ready(function() {viewer.init(); var app = viewer.initSammy(); app.run();});")] 
+     (javascript-tag " $(document).ready(function() {viewer.init(); var app = viewer.initSammy(); app.run('#/');});")] 
       [:body#doc.yui-t4
        [:div#hd 
-        [:h1 "AMQP Message Viewer"]]
+        [:a {:href "/#/"} [:h1 "AMQP Message Viewer"]]]
        [:div#bd
         [:div#yui-main
          [:div.yui-b
@@ -254,10 +256,10 @@
               (alter queues assoc routing-key queueName)))
                                        ; declare queue
     (declare-queue queueName exchange routing-key)
-    (json-str [{:msg (str "Setup queue with key: " routing-key
-                          " and exchange: " exchange)
-                :status "success"
-                :queue-id queueName}])))
+    (json-str {:msg (str "Setup queue with key: " routing-key
+                           " and exchange: " exchange)
+                 :status "success"
+                 :queue-id queueName})))
 
 ;; ========= Routes =========
 
@@ -269,7 +271,7 @@
   
   (GET "/queue/:id" [{:headers {"Content-Type" "application/json"}}]
        (poll-queue-for-messages (params :id)))
-  (GET "/setup/" [{:headers {"Content-Type" "application/json"}}]
+  (PUT "/queue" [{:headers {"Content-Type" "application/json"}}]
        (setup-queue (params :routing-key) (params :exchange)))
   (POST "/message"
         (publish-once (params :routing-key) (params :exchange)))
