@@ -102,10 +102,13 @@
      ;[:link {:type "text/css" :href "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" :rel "stylesheet"}]
      (include-css  "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css"
                    "/public/css/main.css"
-                   "/public/css/form.css")
+                   "/public/css/form.css"
+                   "/public/js/prettify/prettify.css")
      (include-js "/public/js/jquery-1.3.2.min.js"
                  "/public/js/jquery.haml-1.3.js"
                  "/public/js/sammy.js"
+                 "/public/js/prettify/prettify.js"
+                 "/public/js/json2.js"
                  "/public/js/message.js"
                  "/public/js/viewer.js")
      (javascript-tag " $(document).ready(function() {viewer.init(); var app = viewer.initSammy(); app.run('#/');});")] 

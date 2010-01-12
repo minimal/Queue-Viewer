@@ -60,6 +60,7 @@ var viewer = function() {
             $.each(data, function (i, msg) { 
               $('.queue_title').after($('<p/>').haml(message(msg)).html());
             });
+            prettyPrint();
               //console.log("got data");
             retry('reset');
           }

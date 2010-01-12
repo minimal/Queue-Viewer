@@ -9,7 +9,9 @@ message = function (data) {
              ["%td", {"colspan":"3", "style":"font-weight:bold; padding-bottom:5px;"},
               data['routing-key']]],
             ["%tr", 
-             ["%td", data.msg],
+             ["%td",
+              ["%pre.prettyprint",
+               JSON.stringify(JSON.parse(data.msg), null, 4)]], 
              ["%td.date", d.getHours() +":"+ d.getMinutes() +"."+ d.getSeconds()]]]]]
 };
 
