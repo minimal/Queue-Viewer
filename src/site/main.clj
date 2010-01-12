@@ -107,6 +107,8 @@
      (include-js "/public/js/jquery-1.3.2.min.js"
                  "/public/js/jquery.haml-1.3.js"
                  "/public/js/sammy.js"
+                 "/public/js/sammy.json-0.4.1.min.js"
+                 "/public/js/sammy.storage-0.4.1.min.js"
                  "/public/js/prettify/prettify.js"
                  "/public/js/json2.js"
                  "/public/js/message.js"

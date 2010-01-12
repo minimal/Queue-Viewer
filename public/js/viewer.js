@@ -131,7 +131,15 @@ var viewer = function() {
         //called when successful
         console.log(data);
         app.setLocation("#/");
-        $('#queue_list').haml(queue_button({queue_name: data["queue-id"]}));
+        $('#queue_list').haml(queue_button({queue_name: queue_name}));
+        var store  = app.session('store', function() {
+          return {queues: []};
+        })
+        app.log(store);
+        store['queues'].push(queue_name);
+        app.session('store', store);
+        app.log("The current cart: ", store);
+        
       },
       error: function () {
         //called when there is an error
@@ -164,6 +172,8 @@ var viewer = function() {
       var app = $.sammy(function() {
       with(this) {
         element_selector = '#main';
+          //use(Sammy.Template);
+        use(Sammy.Session);
           //console.log('initing sammy');
           get('#/', function() {
               $('#main').html('');
@@ -198,10 +208,20 @@ var viewer = function() {
           with(this) {
             log("posting:" + context);
             setupQueue(params["routing_key"], params["exchange"], params["queue_name"], app);
+            
             //app.setLocation("#/");
             //return false
           }
         });
+
+        var store  = this.session('store', function() {
+          return {queues: []};
+        })
+          // Show previous queues
+        $.each(store['queues'], function (i, queue) {
+          $('#queue_list').haml(queue_button({queue_name: queue}));
+        }  );
+          
         
     } } );
     return app;
