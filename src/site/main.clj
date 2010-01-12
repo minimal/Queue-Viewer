@@ -139,20 +139,21 @@
   (let [msgs (get-waiting-messages queueName)]
     (json-str (for [msg msgs]
                 {:msg (String. (. msg getBody))
+                 :routing-key (String. (.. msg getEnvelope getRoutingKey))
                  :id queueName}))))
 
 (defn setup-queue
   "Setup a queue for a client with a routing key"
-  [routing-key exchange]
-  (let [queueName (str routing-key (rand-int 50))]
-    (dosync (if-not (contains? @queues routing-key) ; add queue description
-              (alter queues assoc routing-key queueName)))
+  [routing-key exchange queueName]
+  (dosync (if-not (contains? @queues routing-key) ; add queue description
+            (alter queues assoc routing-key queueName)))
                                        ; declare queue
-    (declare-queue queueName exchange routing-key)
-    (json-str {:msg (str "Setup queue with key: " routing-key
-                           " and exchange: " exchange)
-                 :status "success"
-                 :queue-id queueName})))
+    
+  (declare-queue queueName exchange routing-key)
+  (json-str {:msg (str "Setup queue with key: " routing-key
+                       " and exchange: " exchange)
+             :status "success"
+             :queue-id queueName}))
 
 ;; ========= Routes =========
 
@@ -165,10 +166,10 @@
   (GET "/queue/:id" [{:headers {"Content-Type" "application/json"}}]
        (poll-queue-for-messages (params :id)))
   (PUT "/queue" [{:headers {"Content-Type" "application/json"}}]
-       (setup-queue (params :routing-key) (params :exchange)))
+       (setup-queue (params :routing-key) (params :exchange) (params :queue-name)))
   (POST "/message"
         (publish-once (params :routing-key) (params :exchange)))
-  (GET "/public/*" (or (serve-file "/home/chris/code/git/queue-viewer/public/" (params :*)) :next))
+  (GET "/public/*" (or (serve-file "/home/chris/devel/git/queue-viewer/public/" (params :*)) :next))
   (GET "/favicon.ico" 404)
   (ANY "*"
        (page-not-found)))
