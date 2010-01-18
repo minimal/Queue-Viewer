@@ -217,20 +217,26 @@ var viewer = function() {
         var store  = this.session('store', function() {
           return {queues: []};
         })
-          // Show previous queues
-        $.each(store['queues'], function (i, queue) {
-          $('#queue_list').haml(queue_button({queue_name: queue}));
-        }  );
           
         
     } } );
     return app;
   }
 
-  function init() {
+  function init(app) {
     initQueueButton('#newmsgButton');
     $('#sendmsgButton').live('click', sendMessage);
+    $('#flushQueuesButton').live('click', function() {
+        var store  = app.session('store');
+        store['queues'] = [];
+        app.session('store', store);
+        $("#queue_list").html("");
+    });
     $('#sidebar').haml(controls);
+    // Show previous queues
+    $.each(app.session('store')['queues'], function (i, queue) {
+      $('#queue_list').haml(queue_button({queue_name: queue}));
+    }  );
   }
 
   // reveal all things private by assigning public pointers

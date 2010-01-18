@@ -121,7 +121,7 @@
                  "/public/js/json2.js"
                  "/public/js/message.js"
                  "/public/js/viewer.js")
-     (javascript-tag " $(document).ready(function() {viewer.init(); var app = viewer.initSammy(); app.run('#/');});")] 
+     (javascript-tag " $(document).ready(function() {var app = viewer.initSammy(); app.run('#/'); viewer.init(app);});")] 
       [:body#doc.yui-t4
        [:div#hd 
         [:a {:href "/#/"} [:h1 "AMQP Message Viewer"]]]
