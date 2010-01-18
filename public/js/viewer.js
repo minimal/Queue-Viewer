@@ -58,7 +58,9 @@ var viewer = function() {
           //called when successful
           if (data.length) {
             $.each(data, function (i, msg) { 
-              $('.queue_title').after($('<p/>').haml(message(msg)).html());
+              msg = $('<p/>').haml(message(msg)).html()
+              $(msg).insertAfter('.queue_title')
+                .animate({height: "toggle"}, 0).animate({height: "toggle"});
             });
             prettyPrint();
               //console.log("got data");
