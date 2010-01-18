@@ -1,5 +1,14 @@
+html {
+    background: #193441;
+}
+
+
 #hd h1 {
-    font-size: 2em;
+    font-size: 1.2em;
+    font: verdana;
+    text-align: center;
+    color: white;
+    
 }
 
 a:visited h1 {
@@ -8,11 +17,21 @@ a:visited h1 {
 
 h2 {
     font-weight: bold;
+    
 }
 
 #hd, #bd {
     padding: 10px;
-    border: 1px solid #B3B3B3;
+    border: 1px solid #B3B3B3;        
+}
+
+#hd {
+    background: #3E606F;
+    padding: 10px;
+}
+
+#bd {
+    background: #EEE;
 }
 
 #main {
@@ -21,6 +40,8 @@ h2 {
 
 #entries {
     padding: 0px;
+    -webkit-box-shadow: 0px 0px 10px black;
+    -moz-box-shadow: 0pt 0pt 1em 0.2em black;
     //border: 1px solid #E3E3E3;
 }
 
@@ -34,7 +55,7 @@ h2 {
 /* } */
 
 .message {
-    background-color:#FFFFFF;
+    background-color: white;
     border-bottom:1px solid #E3E3E3;
     border-left:1px solid #E6E6E6;
     border-right:1px solid #E6E6E6;
