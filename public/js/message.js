@@ -1,18 +1,46 @@
 // jquery haml templates
 
+function truncate(text, max) {
+  if (text.length > max) {
+    return text.slice(0, max) + "..."
+  }
+  else {
+    return text
+  }
+}
+
+function make_pretty(text) {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 4)
+  } catch (e) { // if invalid or not JSON
+      //console.log("error: " + e + "msg: " + text);
+    return text
+  }
+}
+
 message = function (data) {
   var d = new Date();
+  minutes = d.getMinutes();
+  seconds = d.getSeconds();
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
   return ["%.message",
           ["%table",
            ["%tbody",
             ["%tr",
-             ["%td", {"colspan":"3", "style":"font-weight:bold; padding-bottom:5px;"},
-              data['routing-key']]],
+             ["%td", {"colspan":"3", "style":"font-weight:bold; padding-bottom:5px; word-wrap: break-word;",
+                      "title": data['routing-key']},
+              truncate(data['routing-key'], 40)],
+             ["%td.date", d.getHours() +":"+ minutes +"."+ seconds]],
             ["%tr", 
              ["%td",
               ["%pre.prettyprint",
-               JSON.stringify(JSON.parse(data.msg), null, 4)]], 
-             ["%td.date", d.getHours() +":"+ d.getMinutes() +"."+ d.getSeconds()]]]]]
+               make_pretty(data.msg)]], 
+             ]]]]
 };
 
 entries = function(title){
@@ -34,7 +62,7 @@ controls = ["%#controls",
               ["%a", {href: "#/new_queue"},
                "New Queue"]]
             ],
-            ["%h2", "Availible Queues"],
+            ["%h2", "Available Queues"],
             ["%ul#queue_list"]]
 
 queue_button = function(data) {
