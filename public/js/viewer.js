@@ -57,11 +57,28 @@ var viewer = function() {
         success: function (data) {
           //called when successful
           if (data.length) {
-            $.each(data, function (i, msg) { 
-              msg = $('<p/>').haml(message(msg)).html()
+            // $.each(data, function (i, msg) { 
+            //   msg = $('<p/>').haml(message(msg)).html()
+            //   $(msg).insertAfter('.queue_title')
+            //     .animate({height: "toggle"}, 0).animate({height: "toggle"}, {queue: true});
+            // });
+
+            function make_caller_with_tail(msgs) {
+              var tail = msgs.slice(1);
+              return function() {
+                addmsgs(tail);
+              }
+            }
+            function addmsgs(msgs) {
+              if (msgs.length === 0) {
+                return
+              }
+              msg = $('<p/>').haml(message(msgs[0])).html()
               $(msg).insertAfter('.queue_title')
-                .animate({height: "toggle"}, 0).animate({height: "toggle"});
-            });
+                .animate({height: "toggle"}, 0).animate({height: "toggle"},
+                                                        make_caller_with_tail(msgs));
+            }
+            addmsgs(data);
             prettyPrint();
               //console.log("got data");
             retry('reset');
