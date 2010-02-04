@@ -39,14 +39,15 @@ message = function (data) {
             ["%tr", 
              ["%td",
               ["%pre.prettyprint",
-               make_pretty(data.msg)]], 
+               make_pretty(JSON.stringify(data.msg))]], 
              ]]]]
 };
 
 entries = function(title){
   return ["%#entries",
           ["%.queue_title",
-           ["%h2", title]]]
+           ["%h2", title],
+           ["%p#ws_status", {style: "padding: 5px"}]]]
 }
 
 controls = ["%#controls",

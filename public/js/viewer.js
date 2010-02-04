@@ -1,5 +1,7 @@
 
 var viewer = function() {
+  ws = null;
+  
   var current_queue = null;
   function smartPoller(wait, poller) {
       //var do_reset = false
@@ -137,6 +139,48 @@ var viewer = function() {
            }
     );
   }
+  function appendMessages(msgs) {
+    function make_caller_with_tail(msgs) {
+      var tail = msgs.slice(1);
+      return function() {
+        addmsgs(tail);
+      }
+    }
+    function addmsgs(msgs) {
+      if (msgs.length === 0) {
+        return
+      }
+      msg = $('<p/>').haml(message(msgs[0])).html()
+      $(msg).insertAfter('.queue_title')
+        .animate({height: "toggle"}, 0).animate({height: "toggle"},
+                                                make_caller_with_tail(msgs));
+    }
+      //console.log(msgs);
+    addmsgs(msgs);
+    prettyPrint();
+  }
+  function onWsMessage (msg) {
+    console.log(msg.data);
+    appendMessages([JSON.parse(msg.data)]);
+  }
+
+  function onWsClose(msg) {
+    $('#ws_status').html('Websocket closed').css("background-color", "#FFC4C7");
+    if (window.location.hash.split('/')[1] === "queue") {
+        // only reconnect if viewing queue
+        // TODO: put the ws connection in a module var
+      ws = new WebSocket("ws://192.168.1.17:8090/");
+      ws.onmessage = onWsMessage;
+      ws.onclose= onWsClose;
+      ws.onopen = onWsOpen;
+    }
+  }
+
+  function onWsOpen() {
+    $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
+     this.send(JSON.stringify({hash:window.location.hash.split('/').slice(1)}));
+  }
+  
   
   function setupQueue(routing_key, exchange, queue_name, app) {
     $.ajax({
@@ -162,9 +206,9 @@ var viewer = function() {
       },
       error: function () {
         //called when there is an error
-       }   
-           }
-    );
+      }   
+    }
+          );
   }
   
   function initQueueButton(selector) {
@@ -178,8 +222,13 @@ var viewer = function() {
     
   function startQueue(queue_name) {
       // Start monitoring one queue
+    ws = new WebSocket("ws://192.168.1.17:8090/");
+    ws.onmessage = onWsMessage;
+    ws.onclose= onWsClose;
+    ws.onopen = onWsOpen;
     $('#main').html('').haml(entries(queue_name));
-    current_queue = pollNewMessages(queue_name);
+    return ws
+      //current_queue = pollNewMessages(queue_name);
   }
 
   function stopQueue() {
@@ -205,7 +254,7 @@ var viewer = function() {
                       with(this) {
             $(function() {
               // do something
-                  startQueue(params['queue']);
+                  app.ws = startQueue(params['queue']);
                   $('title').html('Monitoring queue: ' + params['queue']);
                    trigger("changed");
                 //console.log("queue: "+ params['queue']);

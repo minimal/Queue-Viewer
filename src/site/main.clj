@@ -11,6 +11,7 @@
   (:use [clojure.contrib.json.write])
   (:use [com.github.icylisper.rabbitmq])
   (:use [site.messaging])
+  (:use [site.websocket])
   (:import (com.rabbitmq.client
              ConnectionParameters
              Connection
@@ -50,9 +51,12 @@
                  "/public/js/sammy.storage-0.4.1.min.js"
                  "/public/js/prettify/prettify.js"
                  "/public/js/json2.js"
+                 "/public/js/swfobject.js"
+                 "/public/js/FABridge.js"
+                 "/public/js/web_socket.js"
                  "/public/js/message.js"
                  "/public/js/viewer.js")
-     (javascript-tag " $(document).ready(function() {var app = viewer.initSammy(); app.run('#/'); viewer.init(app);});")] 
+     (javascript-tag "$(document).ready(function() {WebSocket.__swfLocation = 'WebSocketMain.swf'; var app = viewer.initSammy(); app.run('#/'); viewer.init(app);});")] 
       [:body#doc.yui-t4
        [:div#hd 
         [:a {:href "/#/"} [:h1 "AMQP Message Viewer"]]]
