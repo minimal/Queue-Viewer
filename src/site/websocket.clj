@@ -1,5 +1,7 @@
 (ns site.websocket
+  (:use [site.messaging])
   (:use [compojure])
+  (:use [com.github.icylisper.rabbitmq])
   (:use [clojure.contrib.json read write])
   (:import java.io.IOException
            javax.servlet.RequestDispatcher
@@ -15,21 +17,58 @@
 
 (def outbounds (atom {}))
 
+(def futures (atom {}))
+
+(defn contained?
+  "Swapped argument order for contains? So can use one collection with
+  condp"
+  [key coll] (contains? coll key))
+
+(defn send-message
+  "Easily send a message"
+  [msg outbound]
+  (println "To send msg" msg "to " outbound)
+  (try 
+   (.sendMessage outbound (byte 0)
+                 (json-str {"msg" msg
+                            "routing-key" "test"}))
+   (catch Exception ex
+     (println "Exception while sending: " ex " Outbound: " outbound)
+     (swap! outbounds dissoc outbound))))
+
+
+
 (defn make-chat-websock []
   (let [state (atom 0)
         obj (proxy [WebSocket] []
               (onConnect [outbound]
                          (swap! outbounds assoc this outbound))
               (onMessage [frame data]
+                         ;; TODO: handle different actions eg
+                         ;; listening to a queue
                          (let [decdata (try (read-json data)
                                             (catch Exception _ (str data)))
                                msg (json-str {"routing-key" "foo"
                                               "msg" decdata})
-                               _ (println "recieved: " decdata data)]
-                           (doseq [[_ member] @outbounds]
+                               _ (println "recieved: " decdata (type frame))]
+                           (condp = (first (decdata "hash"))
+                               ;; Should put this in it's own thread
+                               ;; to stop it blocking -future
+                             "queue" (swap! futures assoc this
+                                            (future (println "hi from the future")
+                                                    (consume-queue (last (decdata "hash"))
+                                                                   (@outbounds this)
+                                                                   send-message
+                                                                   #(contains? @outbounds this)))))
+                           (println (count @futures) " futures")
+                          #_(doseq [[_ member] @outbounds]
+                             (println "member" member)
                              (.sendMessage member frame msg))))
               (onDisconnect []
-                            (swap! outbounds dissoc this)))]
+                            (println "onDisconnect WS")
+                            (swap! outbounds dissoc this)
+                            (future-cancel (@futures this))
+                            (swap! futures dissoc this)))]
     obj))
 
 (defn web-sock-serv []

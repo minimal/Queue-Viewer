@@ -285,7 +285,17 @@ var viewer = function() {
         var store  = this.session('store', function() {
           return {queues: []};
         })
-          
+
+        // bind(name, callback)
+        bind('run-route', function(e, data) {
+          /* Clean up if required */
+          if (window.location.hash.split('/')[1] !== "queue") {
+            if (ws) {ws.close();} 
+          }
+            //this.redirect('#/');
+        });
+
+
         
     } } );
     return app;

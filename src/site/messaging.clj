@@ -36,20 +36,21 @@
 
 (defonce queues (ref {}))  ; map of all queues {queue-id queue}
 
-(def connection (connect conn-map))
+;;(def connection (connect conn-map))
 (def c (ref 0))
 (defn publish-once
   ([]
      (publish-once (conn-map :routing-key) (conn-map :exchange)))
   ([routing-key exchange] 
-     (let [[_ channel] connection]
+     (let [[conn channel] (connect basic-conn-map)]
        (dotimes [ n 1]
          (dosync (alter c inc))
                                         ;(bind-channel conn-map channel)
          (println "rabbitmq publishing:" (format "message %d" @c) "to key: " routing-key)
          (publish {:routing-key routing-key
                    :exchange exchange}
-                  channel (format "message %d" @c))))))
+                  channel (format "message %d" @c)))
+       (disconnect channel conn))))
 
 
 (defn get-one-msg
@@ -79,3 +80,34 @@
   [queueName exchange routing-key]
   (let [channel (declare-queue queueName exchange routing-key)]
       (consume-poll basic-conn-map channel)))
+
+(defn consume-queue
+  "Start consuming a queue to feed back to a websocket. Create a
+  connection, Declare the queue, Create a QueueingConsumer, start
+  consuming in a loop"
+  [queue-name wsconn callback pred]
+  (println "start consume" queue-name wsconn)
+  (let [rabconn (connect basic-conn-map)
+        qd (.queueDeclare (rabconn 1) queue-name)
+        qconsumer (QueueingConsumer. (rabconn 1))
+        _ (println "")]
+    (.basicConsume (rabconn 1) queue-name qconsumer)
+    (try 
+     (while (pred)
+            (do        
+              (let [delivery (.nextDelivery qconsumer)
+                    msg (String. (.getBody delivery))
+                    _ (.basicAck (rabconn 1) (.. delivery getEnvelope getDeliveryTag) false)]
+                (callback {"msg" msg
+                           "routing-key" "test"}
+                          wsconn))
+        
+              #_(disconnect (rabconn 1) (rabconn 0))))
+     (disconnect (rabconn 1) (rabconn 0))
+     (println "Disconnection rabbit")
+     (catch Exception ex
+       (try 
+        (disconnect (rabconn 1) (rabconn 0))
+        (catch Exception _ (println "disco failed")))
+       (println queue-name "Consume thread caught exception:" ex))))
+)
