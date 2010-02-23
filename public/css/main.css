@@ -99,14 +99,31 @@ td.date {
     -moz-background-inline-policy:continuous;
     -moz-background-origin:padding;
     //background:transparent url(/images/sidebar-h2.gif) no-repeat scroll left center;
-    border-bottom:1px solid #758A97;
-    border-top:1px solid #758A97;
+    //border-bottom:1px solid #758A97;
+    //border-top:1px solid #758A97;
     color:#222222;
-    font-size:11px;
+    font-size:14px;
     height:17px;
     line-height:1em;
-    margin:15px -8px 5px;
+    margin:5px -8px 5px;
     padding:8px 8px 0;
+}
+
+#sidebar  {
+    -moz-border-radius:5px 5px 5px 5px;
+    border-bottom-left-radius: 5px 5px;
+    border-bottom-right-radius: 5px 5px;
+    border-top-left-radius: 5px 5px;
+    border-top-right-radius: 5px 5px;
+    background:none repeat scroll 0 0 #FFFFFF;
+    border:1px solid #DDDDDD;
+    color:#333333;
+    //font:11px/16px "Lucida Grande",Arial,Sans-serif;
+    //margin:0 0 0 -2px;
+    margin: 10px 10px 10px 0px;
+    padding:8px 9px 10px;
+    -webkit-box-shadow: 0px 0px 10px black;
+    -moz-box-shadow: 0pt 0pt 0.5em 0.1em black;
 }
 
 #controls ul {
