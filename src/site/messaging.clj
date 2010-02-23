@@ -87,27 +87,26 @@
   consuming in a loop"
   [queue-name wsconn callback pred]
   (println "start consume" queue-name wsconn)
-  (let [rabconn (connect basic-conn-map)
-        qd (.queueDeclare (rabconn 1) queue-name)
-        qconsumer (QueueingConsumer. (rabconn 1))
-        _ (println "")]
-    (.basicConsume (rabconn 1) queue-name qconsumer)
+  (let [[conn channel] (connect basic-conn-map)
+        qd (.queueDeclare channel queue-name)
+        qconsumer (QueueingConsumer. channel)]
+    (.basicConsume channel queue-name qconsumer)
     (try 
      (while (pred)
             (do        
               (let [delivery (.nextDelivery qconsumer)
                     msg (String. (.getBody delivery))
-                    _ (.basicAck (rabconn 1) (.. delivery getEnvelope getDeliveryTag) false)]
+                    _ (.basicAck channel (.. delivery getEnvelope getDeliveryTag) false)]
                 (callback {"msg" msg
                            "routing-key" "test"}
                           wsconn))
         
-              #_(disconnect (rabconn 1) (rabconn 0))))
-     (disconnect (rabconn 1) (rabconn 0))
+              #_(disconnect channel conn)))
+     (disconnect channel conn)
      (println "Disconnection rabbit")
      (catch Exception ex
        (try 
-        (disconnect (rabconn 1) (rabconn 0))
+        (disconnect channel conn)
         (catch Exception _ (println "disco failed")))
        (println queue-name "Consume thread caught exception:" ex))))
 )
