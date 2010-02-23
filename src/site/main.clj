@@ -44,7 +44,7 @@
                    "/public/css/main.css"
                    "/public/css/form.css"
                    "/public/js/prettify/prettify.css")
-     (include-js "/public/js/jquery-1.4.min.js"
+     (include-js "/public/js/jquery-1.4.2.min.js"
                  "/public/js/jquery.haml-1.3.js"
                  "/public/js/sammy.js"
                  "/public/js/sammy.json-0.4.1.min.js"
