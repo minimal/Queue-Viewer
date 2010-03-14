@@ -62,6 +62,13 @@
     (disconnect channel conn)
     response))
 
+(defn bind-channel-mod
+  [{:keys [exchange type queue routing-key durable]}
+   #^Channel ch]
+  (.exchangeDeclare ch exchange type durable)
+  ;;  (.queueDeclare ch queue durable)
+  (.queueDeclare ch queue false false false true {})
+  (.queueBind ch queue exchange routing-key))
 
 (defn declare-queue
   "Easily create a queue."
@@ -72,7 +79,7 @@
                    :exchange exchange
                    :queue queueName
                    :type "topic")]
-    (bind-channel mappings channel)
+    (bind-channel-mod mappings channel)
     (disconnect channel conn)
     channel))
 
@@ -88,7 +95,17 @@
   [queue-name wsconn callback pred]
   (println "start consume" queue-name wsconn)
   (let [[conn channel] (connect basic-conn-map)
-        qd (.queueDeclare channel queue-name)
+        ;; temp values
+        exchange "amq.topic"
+        type "topic"
+        durable false
+        routing-key "#"
+        ;; qd (.queueDeclare channel queue-name)
+        qd (.queueDeclare channel queue-name false false false true {})
+        _ (.exchangeDeclare channel exchange type durable)
+        ;;  (.queueDeclare ch queue durable)
+        ;; (.queueDeclare ch queue false durable false true {})
+        _ (.queueBind channel queue-name exchange routing-key)
         qconsumer (QueueingConsumer. channel)]
     (.basicConsume channel queue-name qconsumer)
     (try 
