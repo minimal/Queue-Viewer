@@ -55,11 +55,13 @@
                                ;; Should put this in it's own thread
                                ;; to stop it blocking -future
                              "queue" (swap! futures assoc this
-                                            (future (println "hi from the future")
-                                                    (consume-queue (last (decdata "hash"))
-                                                                   (@outbounds this)
-                                                                   send-message
-                                                                   #(contains? @outbounds this)))))
+                                            (future
+                                             (consume-queue (last (decdata "hash"))
+                                                            (@outbounds this)
+                                                            send-message
+                                                            #(contains? @outbounds this)
+                                                            (decdata "exchange")
+                                                            (decdata "routing-key")))))
                            (println (count @futures) " futures")
                           #_(doseq [[_ member] @outbounds]
                              (println "member" member)

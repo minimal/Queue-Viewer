@@ -92,14 +92,12 @@
   "Start consuming a queue to feed back to a websocket. Create a
   connection, Declare the queue, Create a QueueingConsumer, start
   consuming in a loop"
-  [queue-name wsconn callback pred]
+  [queue-name wsconn callback pred exchange routing-key]
   (println "start consume" queue-name wsconn)
   (let [[conn channel] (connect basic-conn-map)
         ;; temp values
-        exchange "amq.topic"
         type "topic"
         durable false
-        routing-key "#"
         ;; qd (.queueDeclare channel queue-name)
         qd (.queueDeclare channel queue-name false false false true {})
         _ (.exchangeDeclare channel exchange type durable)

@@ -178,7 +178,10 @@ var viewer = function() {
 
   function onWsOpen() {
     $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
-     this.send(JSON.stringify({hash:window.location.hash.split('/').slice(1)}));
+    var hash = window.location.hash.split('/').slice(1);    
+    this.send(JSON.stringify({hash: hash,
+                              exchange: $('#entries div:first').attr("exchange"),
+                              "routing-key": $('#entries div:first').attr("routing-key")}));
   }
   
   
@@ -196,10 +199,12 @@ var viewer = function() {
         app.setLocation("#/");
         $('#queue_list').haml(queue_button({queue_name: queue_name}));
         var store  = app.session('store', function() {
-          return {queues: []};
+          return {queues: {}};
         })
         app.log(store);
-        store['queues'].push(queue_name);
+        store['queues'][queue_name] = {
+          exchange: exchange,
+          "routing-key": routing_key};
         app.session('store', store);
         app.log("The current cart: ", store);
         
@@ -220,13 +225,14 @@ var viewer = function() {
     });
   }
     
-  function startQueue(queue_name) {
+  function startQueue(queue_name, app) {
       // Start monitoring one queue
     ws = new WebSocket("ws://192.168.1.17:8090/");
     ws.onmessage = onWsMessage;
     ws.onclose= onWsClose;
     ws.onopen = onWsOpen;
-    $('#main').html('').haml(entries(queue_name));
+    var queue = app.session("store") ["queues"][queue_name];
+    $('#main').html('').haml(entries(queue_name, queue["routing-key"], queue["exchange"]));
     return ws
       //current_queue = pollNewMessages(queue_name);
   }
@@ -254,7 +260,7 @@ var viewer = function() {
                       with(this) {
             $(function() {
               // do something
-                  app.ws = startQueue(params['queue']);
+                  app.ws = startQueue(params['queue'], app);
                   $('title').html('Monitoring queue: ' + params['queue']);
                    trigger("changed");
                 //console.log("queue: "+ params['queue']);
@@ -306,14 +312,16 @@ var viewer = function() {
     $('#sendmsgButton').live('click', sendMessage);
     $('#flushQueuesButton').live('click', function() {
         var store  = app.session('store');
-        store['queues'] = [];
+        store['queues'] = {};
         app.session('store', store);
         $("#queue_list").html("");
     });
     $('#sidebar').haml(controls);
     // Show previous queues
-    $.each(app.session('store')['queues'], function (i, queue) {
-      $('#queue_list').haml(queue_button({queue_name: queue}));
+    $.each(app.session('store')['queues'], function (queue_name, queue) {
+      $('#queue_list').haml(queue_button({queue_name: queue_name,
+                                          exchange: queue['exchange'],
+                                          "routing-key": queue["routing-key"]}));
     }  );
   }
 

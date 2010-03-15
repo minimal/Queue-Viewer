@@ -43,9 +43,9 @@ message = function (data) {
              ]]]]
 };
 
-entries = function(title){
+entries = function(title, routing_key, exchange){
   return ["%#entries",
-          ["%.queue_title",
+          ["%.queue_title", {"routing-key": routing_key, exchange: exchange},
            ["%h2", title],
            ["%p#ws_status", {style: "padding: 5px"}]]]
 }
@@ -68,8 +68,10 @@ controls = ["%#controls",
 
 queue_button = function(data) {
   return ["%li.action",
-          ["%a#newqButton.action", {href: "#/queue/" + data.queue_name},
-           data.queue_name]]
+          ["%a#newqButton.action", {href: "#/queue/" + data.queue_name,
+                                    exchange: data.exchange,
+                                    "routing-key": data['routing-key']},
+           data.queue_name, ]]
 }
 
 new_queue = ["%h2", "Create a new queue",
