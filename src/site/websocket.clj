@@ -41,7 +41,7 @@
 
 
 
-(defn make-chat-websock []
+(defn make-amqp-websock []
   (let [state (atom 0)
         obj (proxy [WebSocket] []
               (onConnect [outbound]
@@ -55,23 +55,23 @@
                                               "msg" decdata})
                                _ (println "recieved: " decdata (type frame))]
                            (condp = (first (decdata "hash"))
-                               ;; Should put this in it's own thread
+                               ;; Put this in it's own thread
                                ;; to stop it blocking -future
-                             "queue" (swap! futures assoc this
-                                            (future
-                                             (consume-queue (last (decdata "hash"))
-                                                            (@outbounds this)
-                                                            send-message
-                                                            #(contains? @outbounds this)
-                                                            (decdata "exchange")
-                                                            (decdata "routing-key")))))
-                           (println (count @futures) " futures")
-                          #_(doseq [[_ member] @outbounds]
-                             (println "member" member)
-                             (.sendMessage member frame msg))))
+                             "queue" (do (if (contains? @futures this)
+                                           (future-cancel (@futures this)))
+                                         (swap! futures assoc this
+                                                (future
+                                                 (consume-queue
+                                                  (last (decdata "hash"))
+                                                  (@outbounds this)
+                                                  send-message 
+                                                  (decdata "exchange")
+                                                  (decdata "routing-key"))))))
+                           (println (count @futures) " futures")))
               (onDisconnect []
                             (println "onDisconnect WS")
                             (swap! outbounds dissoc this)
+                            ;; Stop consuming the queue
                             (future-cancel (@futures this))
                             (swap! futures dissoc this)))]
     obj))
@@ -83,7 +83,7 @@
                (getNamedDispatcher (proxy-super getServletName))
                (forward request response)))
     (doWebSocketConnect [request response]
-                           (make-chat-websock))))
+                           (make-amqp-websock))))
 
 (defn do-run-websocket-server []
   (run-server {:port 8090}
