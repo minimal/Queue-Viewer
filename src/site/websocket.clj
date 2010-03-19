@@ -29,9 +29,12 @@
   [msg outbound]
   (println "To send msg" msg "to " outbound)
   (try 
-   (.sendMessage outbound (byte 0)
-                 (json-str {"msg" msg
-                            "routing-key" "test"}))
+   (.sendMessage outbound (byte 0) 
+                 (json-str {"msg" (try
+                                   (read-json (msg "msg")) ;; assume json
+                                   (catch Exception ex
+                                     (msg "msg")))
+                            "routing-key" (msg "routing-key")}))
    (catch Exception ex
      (println "Exception while sending: " ex " Outbound: " outbound)
      (swap! outbounds dissoc outbound))))
