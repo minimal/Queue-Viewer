@@ -113,15 +113,9 @@
                     msg (String. (.getBody delivery))
                     _ (.basicAck channel (.. delivery getEnvelope getDeliveryTag) false)]
                 (callback {"msg" msg
-                           "routing-key" "test"}
-                          wsconn))
-        
-              #_(disconnect channel conn)))
-     (disconnect channel conn)
+                           "routing-key" (String. (.. delivery getEnvelope getRoutingKey))}
+                          wsconn))))
      (println "Disconnection rabbit")
-     (catch Exception ex
-       (try 
-        (disconnect channel conn)
-        (catch Exception _ (println "disco failed")))
-       (println queue-name "Consume thread caught exception:" ex))))
-)
+     (catch Exception ex 
+       (println queue-name "Consume thread caught exception:" ex))
+     (finally (disconnect channel conn)))))
