@@ -64,7 +64,8 @@
                                                  (consume-queue
                                                   (last (decdata "hash"))
                                                   (@outbounds this)
-                                                  send-message 
+                                                  send-message
+                                                  #(contains? @outbounds this)
                                                   (decdata "exchange")
                                                   (decdata "routing-key"))))))
                            (println (count @futures) " futures")))
