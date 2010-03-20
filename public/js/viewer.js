@@ -1,7 +1,8 @@
 
 var viewer = function() {
   ws = null;
-  
+  ws_host = "ws://192.168.1.17:8090/";
+    //ws_host = "ws://10.137.16.6:8090/";
   var current_queue = null;
   function smartPoller(wait, poller) {
       //var do_reset = false
@@ -169,10 +170,10 @@ var viewer = function() {
     if (window.location.hash.split('/')[1] === "queue") {
         // only reconnect if viewing queue
         // TODO: put the ws connection in a module var
-      ws = new WebSocket("ws://192.168.1.17:8090/");
-      ws.onmessage = onWsMessage;
-      ws.onclose= onWsClose;
-      ws.onopen = onWsOpen;
+      viewer.ws = new WebSocket(ws_host);
+      viewer.ws.onmessage = onWsMessage;
+      viewer.ws.onclose= onWsClose;
+      viewer.ws.onopen = onWsOpen;
     }
   }
 
@@ -227,15 +228,29 @@ var viewer = function() {
     
   function startQueue(queue_name, app) {
       // Start monitoring one queue
-    ws = new WebSocket("ws://192.168.1.17:8090/");
-    ws.onmessage = onWsMessage;
-    ws.onclose= onWsClose;
-    ws.onopen = onWsOpen;
+    viewer.ws = new WebSocket(ws_host);
+    viewer.ws.onmessage = onWsMessage;
+    viewer.ws.onclose= onWsClose;
+    viewer.ws.onopen = onWsOpen;
     var queue = app.session("store") ["queues"][queue_name];
     $('#main').html('').haml(entries(queue_name, queue["routing-key"], queue["exchange"]));
     return ws
       //current_queue = pollNewMessages(queue_name);
   }
+    /* Switch to monitoring a different queue without killing the
+    websocket */
+    function switchQueue(ws, queue_name, app) {
+        var queue = app.session("store") ["queues"][queue_name];
+        $('#main').html('').haml(entries(queue_name, queue["routing-key"], queue["exchange"]));
+        $('title').html('Monitoring queue: ' + queue_name);
+        $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
+        app.trigger("changed");
+                    console.log("queue: "+ queue_name);
+        ws.send(JSON.stringify({hash: ["queue", queue_name],
+                                action: "queue",
+                                exchange: queue["exchange"],
+                                "routing-key": queue["routing-key"]}));
+    }
 
   function stopQueue() {
     console.log(current_queue);
@@ -259,11 +274,18 @@ var viewer = function() {
         get('#/queue/:queue', function() {
                       with(this) {
             $(function() {
-              // do something
-                  app.ws = startQueue(params['queue'], app);
-                  $('title').html('Monitoring queue: ' + params['queue']);
-                   trigger("changed");
-                //console.log("queue: "+ params['queue']);
+                /* if no websocket is open start new queue with new websocket */
+                if (viewer.ws === null ||  viewer.ws.readyState != 1 ) {
+                    app.ws = startQueue(params['queue'], app);
+                    $('title').html('Monitoring queue: ' + params['queue']);
+                    trigger("changed");
+                    console.log("queue: "+ params['queue']);
+                }
+                else {
+                    console.log("switching queue");
+                    switchQueue(viewer.ws, params['queue'], app);
+                }
+                
               log(app.getLocation());              
             });
           }
@@ -295,9 +317,10 @@ var viewer = function() {
         // bind(name, callback)
         bind('run-route', function(e, data) {
           /* Clean up if required */
-          if (window.location.hash.split('/')[1] !== "queue") {
-            if (ws) {ws.close();} 
-          }
+            if (window.location.hash.split('/')[1] !== "queue") {
+                console.log("closing ws", ws, viewer.ws);
+                if (viewer.ws) {viewer.ws.close();}
+             }
             //this.redirect('#/');
         });
 
@@ -329,6 +352,7 @@ var viewer = function() {
   return {
     init: init,
     initSammy: initSammy,
-    current_queue: stopQueue
+    current_queue: stopQueue,
+    ws: ws
   };
 }();

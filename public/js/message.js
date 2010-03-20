@@ -46,7 +46,7 @@ message = function (data) {
 entries = function(title, routing_key, exchange){
   return ["%#entries",
           ["%.queue_title", {"routing-key": routing_key, exchange: exchange},
-           ["%h2", title],
+           ["%h2", title, " key: ", routing_key, " exchange: ", exchange],
            ["%p#ws_status", {style: "padding: 5px"}]]]
 }
 
