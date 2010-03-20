@@ -47,8 +47,8 @@
      (include-js "/public/js/jquery-1.4.2.min.js"
                  "/public/js/jquery.haml-1.3.js"
                  "/public/js/sammy.js"
-                 "/public/js/sammy.json-0.4.1.min.js"
-                 "/public/js/sammy.storage-0.4.1.min.js"
+                 "/public/js/sammy.json-0.5.2.min.js"
+                 "/public/js/sammy.storage-0.5.2.min.js"
                  "/public/js/prettify/prettify.js"
                  "/public/js/json2.js"
                  "/public/js/swfobject.js"
@@ -56,7 +56,7 @@
                  "/public/js/web_socket.js"
                  "/public/js/message.js"
                  "/public/js/viewer.js")
-     (javascript-tag "$(document).ready(function() {WebSocket.__swfLocation = '/public/js/WebSocketMain.swf'; var app = viewer.initSammy(); app.run('#/'); viewer.init(app);});")] 
+     (javascript-tag "$(document).ready(function() {WebSocket.__swfLocation = '/public/js/WebSocketMain.swf'; sammy_app = viewer.initSammy(); sammy_app.run('#/'); viewer.init(sammy_app);});")] 
       [:body#doc.yui-t4
        [:div#hd 
         [:a {:href "/#/"} [:h1 "AMQP Message Viewer"]]]
@@ -129,3 +129,5 @@
   (run-server {:port 8080}
               "/*" (servlet queue-viewer)))
 
+(defn do-run-both-servers []
+  [(do-run-server) (do-run-websocket-server)])
