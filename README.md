@@ -23,6 +23,8 @@ Features
 - Remembers previous queues.
 - Uses web-socket-js for browsers without native websockets but with flash
 
+![screenshot](http://github.com/downloads/minimal/Queue-Viewer/queue-viewer.png "Screenshot")
+
 Requirements
 ------------
 
