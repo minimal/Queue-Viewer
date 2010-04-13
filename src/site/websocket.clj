@@ -49,25 +49,23 @@
               (onMessage [frame data]
                          ;; TODO: handle different actions eg
                          ;; listening to a queue
-                         (let [decdata (try (read-json data)
-                                            (catch Exception _ (str data)))
-                               msg (json-str {"routing-key" "foo"
-                                              "msg" decdata})
-                               _ (println "recieved: " decdata (type frame))]
-                           (condp = (first (decdata "hash"))
+                         (let [msg (try (read-json data)
+                                            (catch Exception _ (str data))) 
+                               _ (println "recieved: " msg (type frame))
+                               args (msg "args")]
+                           (condp = (msg "_action")
                                ;; Put this in it's own thread
                                ;; to stop it blocking -future
                              "queue" (do (if (contains? @futures this)
-                                           (future-cancel (@futures this)))
+                                           (future-cancel (@futures this))) 
                                          (swap! futures assoc this
                                                 (future
                                                  (consume-queue
-                                                  (last (decdata "hash"))
-                                                  (@outbounds this)
-                                                  send-message
+                                                  args 
+                                                  #(send-message
+                                                    % (@outbounds this))
                                                   #(contains? @outbounds this)
-                                                  (decdata "exchange")
-                                                  (decdata "routing-key"))))))
+)))))
                            (println (count @futures) " futures")))
               (onDisconnect []
                             (println "onDisconnect WS")

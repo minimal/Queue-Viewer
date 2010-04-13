@@ -92,17 +92,17 @@
   "Start consuming a queue to feed back to a websocket. Create a
   connection, Declare the queue, Create a QueueingConsumer, start
   consuming in a loop"
-  [queue-name wsconn callback pred exchange routing-key]
-  (println "start consume" queue-name wsconn)
+  [{queue-name "name"
+    exchange "exchange"
+    routing-key "routing-key"}
+   callback pred]
+  (println "start consume" queue-name)
   (let [[conn channel] (connect basic-conn-map)
         ;; temp values
         type "topic"
-        durable false
-        ;; qd (.queueDeclare channel queue-name)
+        durable false 
         qd (.queueDeclare channel queue-name false false false true {})
         _ (.exchangeDeclare channel exchange type durable)
-        ;;  (.queueDeclare ch queue durable)
-        ;; (.queueDeclare ch queue false durable false true {})
         _ (.queueBind channel queue-name exchange routing-key)
         qconsumer (QueueingConsumer. channel)]
     (.basicConsume channel queue-name qconsumer)
@@ -113,8 +113,7 @@
                     msg (String. (.getBody delivery))
                     _ (.basicAck channel (.. delivery getEnvelope getDeliveryTag) false)]
                 (callback {"msg" msg
-                           "routing-key" (String. (.. delivery getEnvelope getRoutingKey))}
-                          wsconn))))
+                           "routing-key" (String. (.. delivery getEnvelope getRoutingKey))}))))
      (println "Disconnection rabbit")
      (catch Exception ex 
        (println queue-name "Consume thread caught exception:" ex))

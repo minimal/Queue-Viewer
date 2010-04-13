@@ -129,7 +129,7 @@ var viewer = function() {
       type: "POST",
       dataType: "json",
       data: {exchange: "amq.topic",
-             'routing-key': "boo"},
+             'routing-key': "earth.europe.england.london"},
       success: function (data) {
         //called when successful
      
@@ -161,7 +161,8 @@ var viewer = function() {
     prettyPrint();
   }
   function onWsMessage (msg) {
-    console.log(msg.data);
+      // TODO: handle other type of message no just amqp for appending
+      // console.log(msg.data);
     appendMessages([JSON.parse(msg.data)]);
   }
 
@@ -170,6 +171,7 @@ var viewer = function() {
     if (window.location.hash.split('/')[1] === "queue") {
         // only reconnect if viewing queue
         // TODO: put the ws connection in a module var
+      delete viewer.ws;
       viewer.ws = new WebSocket(ws_host);
       viewer.ws.onmessage = onWsMessage;
       viewer.ws.onclose= onWsClose;
@@ -180,9 +182,12 @@ var viewer = function() {
   function onWsOpen() {
     $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
     var hash = window.location.hash.split('/').slice(1);    
-    this.send(JSON.stringify({hash: hash,
-                              exchange: $('#entries div:first').attr("exchange"),
-                              "routing-key": $('#entries div:first').attr("routing-key")}));
+    this.send(JSON.stringify({
+        _action: "queue",
+        args: {
+            name: hash[1],
+            exchange: $('#entries div:first').attr("exchange"),
+            "routing-key": $('#entries div:first').attr("routing-key")}}));
   }
   
   
@@ -246,10 +251,11 @@ var viewer = function() {
         $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
         app.trigger("changed");
                     console.log("queue: "+ queue_name);
-        ws.send(JSON.stringify({hash: ["queue", queue_name],
-                                action: "queue",
-                                exchange: queue["exchange"],
-                                "routing-key": queue["routing-key"]}));
+        ws.send(JSON.stringify({
+            _action: "queue",
+            args: {name: queue_name,
+                   exchange: queue["exchange"],
+                   "routing-key": queue["routing-key"]}}));
     }
 
   function stopQueue() {
