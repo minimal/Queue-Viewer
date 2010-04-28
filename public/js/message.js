@@ -61,7 +61,9 @@ controls = ["%#controls",
               "Remove queues from session"],
              ["%li.action",
               ["%a", {href: "#/new_queue"},
-               "New Queue"]]
+               "New Queue"]],
+             ["%li#trimView.action", {style: "cursor: pointer;", title: "Trim to most recent 10 messages"},
+             "Trim View"]
             ],
             ["%h2", "Available Queues"],
             ["%ul#queue_list"]]

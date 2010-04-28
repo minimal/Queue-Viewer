@@ -345,6 +345,9 @@ var viewer = function() {
         app.session('store', store);
         $("#queue_list").html("");
     });
+      $('#trimView').live('click', function() {
+          $('#entries .message').slice(10).remove();
+      });
     $('#sidebar').haml(controls);
     // Show previous queues
     $.each(app.session('store')['queues'], function (queue_name, queue) {
