@@ -83,6 +83,7 @@ var viewer = function() {
             }
             addmsgs(data);
             prettyPrint();
+            $(".prettyprint").removeClass('prettyprint')
               //console.log("got data");
             retry('reset');
           }
@@ -159,6 +160,7 @@ var viewer = function() {
       //console.log(msgs);
     addmsgs(msgs);
     prettyPrint();
+    $(".prettyprint").removeClass('prettyprint')
   }
   function onWsMessage (msg) {
       // TODO: handle other type of message no just amqp for appending
