@@ -46,9 +46,9 @@
                    "/public/js/prettify/prettify.css")
      (include-js "/public/js/jquery-1.4.2.min.js"
                  "/public/js/jquery.haml-1.3.js"
-                 "/public/js/sammy.js"
-                 "/public/js/sammy.json-0.5.2.min.js"
-                 "/public/js/sammy.storage-0.5.2.min.js"
+                 "/public/js/sammy-0.5.3.min.js"
+                 "/public/js/sammy.json-0.5.3.min.js"
+                 "/public/js/sammy.storage-0.5.3.min.js"
                  "/public/js/prettify/prettify.js"
                  "/public/js/json2.js"
                  "/public/js/swfobject.js"
