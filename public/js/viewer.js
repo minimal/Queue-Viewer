@@ -165,7 +165,7 @@ var viewer = function() {
   function onWsMessage (msg) {
       // TODO: handle other type of message no just amqp for appending
       // console.log(msg.data);
-    appendMessages([JSON.parse(msg.data)]);
+    appendMessages([JSON.parse(msg.data).args]);
   }
 
   function onWsClose(msg) {
@@ -185,7 +185,7 @@ var viewer = function() {
     $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
     var hash = window.location.hash.split('/').slice(1);    
     this.send(JSON.stringify({
-        _action: "queue",
+        _action: "start-queue",
         args: {
             name: hash[1],
             exchange: $('#entries div:first').attr("exchange"),

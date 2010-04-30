@@ -30,16 +30,48 @@
   (println "To send msg" msg "to " outbound)
   (try 
    (.sendMessage outbound (byte 0) 
-                 (json-str {"msg" (try
-                                   (read-json (msg "msg")) ;; assume json
-                                   (catch Exception ex
-                                     (msg "msg")))
-                            "routing-key" (msg "routing-key")}))
+                 (json-str {:_action :msg
+                            :args {"msg" (try
+                                          (read-json (msg "msg")) ;; assume json
+                                          (catch Exception ex
+                                            (msg "msg")))
+                                   "routing-key" (msg "routing-key")}})) ;; XXX don't assume amqp
    (catch Exception ex
      (println "Exception while sending: " ex " Outbound: " outbound)
      (swap! outbounds dissoc outbound))))
 
 
+
+;; rpc funcs go here
+
+(defn start-queue
+  "Start consuming a queue in a future"
+  [{:keys [name exchange routing-key] :as args} websocket]
+  (do (stop-queue nil websocket) 
+      (swap! futures assoc websocket
+             (future
+              (consume-queue
+               args 
+               #(send-message
+                 % (@outbounds websocket))
+               #(contains? @outbounds websocket))))))
+
+(defn stop-queue
+  "Stop listening to a queue"
+  [name websocket]
+  (if (contains? @futures websocket)
+    (future-cancel (@futures websocket))))
+
+(def rpc-methods
+     {:start-queue start-queue
+      :stop-queue stop-queue})
+
+(defn handle-rpc
+  "Dispatch a websocket message to the correct method"
+  [action args websocket]
+  ((rpc-methods (keyword action)) args websocket))
+
+;; end rpc
 
 (defn make-amqp-websock []
   (let [state (atom 0)
@@ -47,25 +79,12 @@
               (onConnect [outbound]
                          (swap! outbounds assoc this outbound))
               (onMessage [frame data]
-                         ;; TODO: handle different actions eg
-                         ;; listening to a queue
                          (let [msg (try (read-json data)
                                             (catch Exception _ (str data))) 
                                _ (println "recieved: " msg (type frame))
+                               action (msg "_action")
                                args (msg "args")]
-                           (condp = (msg "_action")
-                               ;; Put this in it's own thread
-                               ;; to stop it blocking -future
-                             "queue" (do (if (contains? @futures this)
-                                           (future-cancel (@futures this))) 
-                                         (swap! futures assoc this
-                                                (future
-                                                 (consume-queue
-                                                  args 
-                                                  #(send-message
-                                                    % (@outbounds this))
-                                                  #(contains? @outbounds this)
-)))))
+                           (handle-rpc action args this) 
                            (println (count @futures) " futures")))
               (onDisconnect []
                             (println "onDisconnect WS")
