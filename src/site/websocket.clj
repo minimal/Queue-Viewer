@@ -30,12 +30,12 @@
   (println "To send msg" msg "to " outbound)
   (try 
    (.sendMessage outbound (byte 0) 
-                 (json-str {:_action :msg
-                            :args {"msg" (try
-                                          (read-json (msg "msg")) ;; assume json
-                                          (catch Exception ex
-                                            (msg "msg")))
-                                   "routing-key" (msg "routing-key")}})) ;; XXX don't assume amqp
+                 (json-str {:_action :msg ;; change to amqp-msg
+                            :args {:msg (try
+                                         (read-json (:msg msg)) ;; assume json
+                                         (catch Exception ex
+                                           (:msg msg))) 
+                                   :envelope (:envelope msg)}})) ;; XXX don't assume amqp
    (catch Exception ex
      (println "Exception while sending: " ex " Outbound: " outbound)
      (swap! outbounds dissoc outbound))))
@@ -46,14 +46,15 @@
 
 (defn start-queue
   "Start consuming a queue in a future"
-  [{:keys [name exchange routing-key] :as args} websocket]
+  ;;[{:keys [name exchange routing-key] :as args} websocket]
+  [args websocket]
   (do (stop-queue nil websocket) 
       (swap! futures assoc websocket
              (future
               (consume-queue
                args 
-               #(send-message
-                 % (@outbounds websocket))
+               #(send-message  ;; remove BasicProperties before json
+                 (dissoc  % :props) (@outbounds websocket))
                #(contains? @outbounds websocket))))))
 
 (defn stop-queue

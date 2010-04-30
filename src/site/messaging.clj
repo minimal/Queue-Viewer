@@ -111,9 +111,15 @@
             (do        
               (let [delivery (.nextDelivery qconsumer)
                     msg (String. (.getBody delivery))
+                    envelope (.getEnvelope delivery)
                     _ (.basicAck channel (.. delivery getEnvelope getDeliveryTag) false)]
-                (callback {"msg" msg
-                           "routing-key" (String. (.. delivery getEnvelope getRoutingKey))}))))
+                (callback {:msg msg
+                           :envelope {:exchange (.getExchange envelope)
+                                      :tag (.getDeliveryTag envelope)
+                                      :isRedeliver (.isRedeliver envelope)
+                                      :routing-key (String. (.getRoutingKey envelope))}
+                           :props (.getProperties delivery)
+                           }))))
      (println "Disconnection rabbit")
      (catch Exception ex 
        (println queue-name "Consume thread caught exception:" ex))
