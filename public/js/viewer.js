@@ -1,8 +1,7 @@
 
 var viewer = function() {
   ws = null;
-  ws_host = "ws://192.168.1.17:8090/";
-    //ws_host = "ws://10.137.16.6:8090/";
+  ws_host = "ws://" + window.location.hostname + ":8090/"
   var current_queue = null;
   function smartPoller(wait, poller) {
       //var do_reset = false
@@ -254,7 +253,7 @@ var viewer = function() {
         app.trigger("changed");
                     console.log("queue: "+ queue_name);
         ws.send(JSON.stringify({
-            _action: "queue",
+            _action: "start-queue",
             args: {name: queue_name,
                    exchange: queue["exchange"],
                    "routing-key": queue["routing-key"]}}));
