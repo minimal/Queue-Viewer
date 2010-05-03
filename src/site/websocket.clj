@@ -43,6 +43,11 @@
 
 
 ;; rpc funcs go here
+(defn stop-queue
+  "Stop listening to a queue"
+  [name websocket]
+  (if (contains? @futures websocket)
+    (future-cancel (@futures websocket))))
 
 (defn start-queue
   "Start consuming a queue in a future"
@@ -57,11 +62,6 @@
                  (dissoc  % :props) (@outbounds websocket))
                #(contains? @outbounds websocket))))))
 
-(defn stop-queue
-  "Stop listening to a queue"
-  [name websocket]
-  (if (contains? @futures websocket)
-    (future-cancel (@futures websocket))))
 
 (def rpc-methods
      {:start-queue start-queue
