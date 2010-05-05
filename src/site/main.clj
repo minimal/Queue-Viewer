@@ -7,8 +7,11 @@
 ;; this software.
 
 (ns site.main
+  (:gen-class)
   (:use [compojure])
   (:use [clojure.contrib.json.write])
+  (:use clojure.contrib.command-line)
+  (:use clojure.contrib.duck-streams)
   (:use [com.github.icylisper.rabbitmq])
   (:use [site.messaging])
   (:use [site.websocket])
@@ -21,6 +24,7 @@
              Consumer
              QueueingConsumer)))
 
+(def public-dir (atom ""))
 
 ;; "AMQP live queue viewer
 
@@ -117,7 +121,7 @@
        (setup-queue (params :routing-key) (params :exchange) (params :queue-name)))
   (POST "/message"
         (publish-once (params :routing-key) (params :exchange)))
-  (GET "/public/*" (or (serve-file "/home/chris/devel/git/queue-viewer/public/" (params :*)) :next))
+  (GET "/public/*" (or (serve-file @public-dir (params :*)) :next))
   (GET "/favicon.ico" 404)
   (ANY "*"
        (page-not-found)))
@@ -125,9 +129,30 @@
 
 ;; ========= server =========
 
-(defn do-run-server []
-  (run-server {:port 8080}
+(defn do-run-server
+  [port]
+  (run-server {:port port}
               "/*" (servlet queue-viewer)))
 
 (defn do-run-both-servers []
   [(do-run-server) (do-run-websocket-server)])
+
+(defn -main [& args] 
+  (with-command-line args
+    "Queue Viewer"
+    [[rabbithost "Rabbitmq host" "dev.rabbitmq.com"]
+     [webport "Webserver port" 8080]
+     [staticdir "Path to static files" "current-dir/public"]] 
+    (let [webserver (if webport
+                      (do-run-server (Integer. webport))
+                       (do-run-server 8080))
+          websock-server (do-run-websocket-server)]
+      (if rabbithost (swap! basic-conn-map assoc :host rabbithost))
+      (if staticdir
+        (reset! public-dir staticdir)
+        (reset! public-dir (str (pwd) "/public")))
+      (println "rabbit: " (:host @basic-conn-map)
+               "webport: " (or webport 8080)
+               "public: " @public-dir)
+      (println "Servers started: " webserver websock-server)
+      [webserver websock-server])))

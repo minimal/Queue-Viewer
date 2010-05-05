@@ -26,13 +26,13 @@
                    :durable false
                    :routing-key "atata"})
 
-(defonce basic-conn-map {:username "guest"
-                         :password "guest"
-                         :host "vsuse"
-                         :port 5672
-                         :virtual-host "/"
-                         :durable false
-                         })
+(def basic-conn-map (atom {:username "guest"
+                           :password "guest"
+                           :host "dev.rabbitmq.com"
+                           :port 5672
+                           :virtual-host "/"
+                           :durable false
+                           }))
 
 (defonce queues (ref {}))  ; map of all queues {queue-id queue}
 
@@ -42,7 +42,7 @@
   ([]
      (publish-once (conn-map :routing-key) (conn-map :exchange)))
   ([routing-key exchange] 
-     (let [[conn channel] (connect basic-conn-map)]
+     (let [[conn channel] (connect @basic-conn-map)]
        (dotimes [ n 1]
          (dosync (alter c inc))
                                         ;(bind-channel conn-map channel)
@@ -57,7 +57,7 @@
   "Get one message with basicGet"
   [queueName]
   (let [noAck true
-        [conn channel] (connect basic-conn-map);;connection
+        [conn channel] (connect @basic-conn-map);;connection
         response (.basicGet channel queueName noAck) ]
     (disconnect channel conn)
     response))
@@ -73,8 +73,8 @@
 (defn declare-queue
   "Easily create a queue."
   [queueName exchange routing-key]
-  (let [[conn channel] (connect basic-conn-map)
-        mappings (assoc basic-conn-map
+  (let [[conn channel] (connect @basic-conn-map)
+        mappings (assoc @basic-conn-map
                    :routing-key routing-key
                    :exchange exchange
                    :queue queueName
@@ -86,7 +86,7 @@
 (defn do-consume-poll
   [queueName exchange routing-key]
   (let [channel (declare-queue queueName exchange routing-key)]
-      (consume-poll basic-conn-map channel)))
+      (consume-poll @basic-conn-map channel)))
 
 (defn consume-queue
   "Start consuming a queue to feed back to a websocket. Create a
@@ -97,7 +97,7 @@
     routing-key "routing-key"}
    callback pred]
   (println "start consume" queue-name)
-  (let [[conn channel] (connect basic-conn-map)
+  (let [[conn channel] (connect @basic-conn-map)
         ;; temp values
         type "topic"
         durable false 
