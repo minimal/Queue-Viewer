@@ -159,3 +159,20 @@ span.date {
 #controls ul li.action:hover {
     color: #758A97;
 }
+
+.trafficlights span {
+    float: right;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 0 5px;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    background-color: #DDDDDD;
+    cursor: pointer;
+}
+
+.trafficlights .running {background-color: #4EE271;}
+.trafficlights .stopped {background-color: #EDEC76;}
+.trafficlights .fatal {background-color: #FA7881;}
+.trafficlights .off {background-color: transparent;}

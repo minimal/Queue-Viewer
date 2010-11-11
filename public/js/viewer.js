@@ -349,6 +349,10 @@ var viewer = function() {
       $('#trimView').live('click', function() {
           $('#entries .message').slice(10).remove();
       });
+
+    $(".trafficlights span").live('click', function() {
+      $(this).toggleClass('running');
+    });
     $('#sidebar').haml(controls);
     // Show previous queues
     $.each(app.session('store')['queues'], function (queue_name, queue) {

@@ -36,6 +36,7 @@ message = function (data) {
                           "title": data['routing-key']},
               truncate(data.envelope['routing-key'], 40), " | ", data.envelope.exchange,
               " | Tag: ", data.envelope.tag, data.envelope.isRedeliver && ", RD" || "",
+              ["%span.trafficlights", {title: "Mark Message"}, ["%span.unchecked"]],
               ["%span.date", d.getHours() +":"+ minutes +"."+ seconds]]],
             ["%tr", 
              ["%td",
