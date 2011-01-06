@@ -318,7 +318,7 @@ var viewer = function() {
         });
 
         var store  = this.session('store', function() {
-          return {queues: []};
+          return {queues: {}};
         })
 
         // bind(name, callback)
