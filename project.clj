@@ -6,10 +6,10 @@
                  [org.apache.commons.codec "1.4"]
                  [org.apache.commons/commons-io "1.3.2"]
                  [org.apache.commons.fileupload "1.2.1"]
-                 [org.eclipse.jetty/jetty-server "7.3.0-SNAPSHOT"]
-                 [org.eclipse.jetty/jetty-servlet "7.3.0-SNAPSHOT"]
-                 [org.eclipse.jetty/jetty-websocket "7.3.0-SNAPSHOT"]
+                 [org.eclipse.jetty/jetty-server "7.2.2.v20101205"]
+                 [org.eclipse.jetty/jetty-servlet "7.2.2.v20101205"]
+                 [org.eclipse.jetty/jetty-websocket "7.2.2.v20101205"]
                  [com.rabbitmq/amqp-client "1.7.2"]]
-  ;;:dev-dependencies [[swank-clojure "1.1.0"]]
-  :main site.main
-  )
+  :dev-dependencies [[swank-clojure "1.3.0-SNAPSHOT"
+                      marginalia "0.3.0"]]
+  :main site.main)
