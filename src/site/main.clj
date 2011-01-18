@@ -135,7 +135,7 @@
               "/*" (servlet queue-viewer)))
 
 (defn do-run-both-servers []
-  [(do-run-server) (do-run-websocket-server)])
+  [(do-run-server 8080) (do-run-websocket-server)])
 
 (defn -main [& args] 
   (with-command-line args
