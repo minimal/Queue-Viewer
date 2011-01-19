@@ -192,7 +192,7 @@ var viewer = function() {
   }
   
   
-  function setupQueue(routing_key, exchange, queue_name, app) {
+  function setupQueue(routing_key, exchange, queue_name, app, callback) {
     $.ajax({
       url: "queue",
       type: "PUT",
@@ -202,8 +202,7 @@ var viewer = function() {
              "queue-name": queue_name},
       success: function (data) {
         //called when successful
-        console.log(data);
-        app.setLocation("#/");
+        console.log(data); 
         $('#queue_list').haml(queue_button({queue_name: queue_name}));
         var store  = app.session('store', function() {
           return {queues: {}};
@@ -214,7 +213,7 @@ var viewer = function() {
           "routing-key": routing_key};
         app.session('store', store);
         app.log("The current cart: ", store);
-        
+        if (callback) {callback();};
       },
       error: function () {
         //called when there is an error
@@ -310,19 +309,25 @@ var viewer = function() {
         put('#/new_queue', function(context) {
           with(this) {
             log("posting:" + context);
-            setupQueue(params["routing_key"], params["exchange"], params["queue_name"], app);
-            
-            //app.setLocation("#/");
+            setupQueue(params["routing_key"], params["exchange"], params["queue_name"], app,
+                       function() {redirect('#/');} ); 
             //return false
           }
         });
+
+        get('#/new_queue/:exchange/:key', function(context) {
+          with(this) {
+              var queue_name = "queue" + Math.floor(Math.random()*1000000);
+              setupQueue(params["key"], params["exchange"], queue_name, app,
+                         function() {redirect('#/queue/' + queue_name);} ); 
+          }
+        })
 
         var store  = this.session('store', function() {
           return {queues: {}};
         })
 
-        // bind(name, callback)
-        bind('run-route', function(e, data) {
+        after( function(e, data) {
           /* Clean up if required */
             if (window.location.hash.split('/')[1] !== "queue") {
                 console.log("closing ws", ws, viewer.ws);

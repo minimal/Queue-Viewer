@@ -1,4 +1,4 @@
-(defproject queue-viewer "0.1"
+(defproject queue-viewer "0.2-SNAPSHOT"
   :description "AMQP Queue Viewer"
   :url "http://github.com/minimal/Queue-Viewer"
   :dependencies [[org.clojure/clojure "1.1.0"]
@@ -10,6 +10,6 @@
                  [org.eclipse.jetty/jetty-servlet "7.2.2.v20101205"]
                  [org.eclipse.jetty/jetty-websocket "7.2.2.v20101205"]
                  [com.rabbitmq/amqp-client "1.7.2"]]
-  :dev-dependencies [[swank-clojure "1.3.0-SNAPSHOT"
+  :dev-dependencies [[swank-clojure "1.2.1"
                       marginalia "0.3.0"]]
   :main site.main)
