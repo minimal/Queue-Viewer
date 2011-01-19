@@ -23,13 +23,25 @@ Features
 - Remembers previous queues.
 - Uses web-socket-js for browsers without native websockets but with flash
 
-![screenshot](http://github.com/downloads/minimal/Queue-Viewer/queue-viewer.png "Screenshot")
+![screenshot](//github.com/downloads/minimal/Queue-Viewer/queue-viewer.png "Screenshot")
 
 Requirements
 ------------
 
-- Clojure 1.1+
-- Jetty 7.0.2
+*Run*
+
+- Download and extract [queue-viewer-0.2-SNAPSHOT.tar.bz2](//github.com/downloads/minimal/Queue-Viewer/queue-viewer-0.2-SNAPSHOT.tar.bz2)
+- cd to the directory
+- type
+        server -jar queue-viewer-0.2-SNAPSHOT-standalone.jar --rabbithost myrabbitserver --webport 9090 --staticdir /path-to-app/public
+- go to http://localhost:9090 in  a browser
+- click "All test"
+- click "Send test message" to test
+ 
+*Dev*
+
+- Clojure 1.1
+- Jetty 7.2
 - compojure with [this patch](http://github.com/minimal/compojure/commit/4ea5dc56f6be0a4345141dc45896b3f12cb6e131) applied to make it work with Jetty 7
 - jquery 1.4+
 - [sammy.js](http://github.com/quirkey/sammy)
