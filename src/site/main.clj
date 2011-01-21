@@ -47,20 +47,27 @@
      (include-css  "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css"
                    "/public/css/main.css"
                    "/public/css/form.css"
-                   "/public/js/prettify/prettify.css")
-     (include-js "/public/js/jquery-1.4.2.min.js"
-                 "/public/js/jquery.haml-1.3.js"
-                 "/public/js/sammy-0.5.3.min.js"
-                 "/public/js/sammy.json-0.5.3.min.js"
-                 "/public/js/sammy.storage-0.5.3.min.js"
-                 "/public/js/prettify/prettify.js"
-                 "/public/js/json2.js"
-                 "/public/js/swfobject.js"
-                 "/public/js/FABridge.js"
-                 "/public/js/web_socket.js"
+                   "/public/js/lib/prettify/prettify.css")
+     (javascript-tag "if (!window.console) console = {log: function(){ }, error: function(){ }};")
+     (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"
+                 "/public/js/lib/jquery.haml-1.3.js"
+                 "/public/js/lib/sammy-0.6.2.min.js"
+                 "/public/js/lib/sammy.json-0.6.2.min.js"
+                 "/public/js/lib/sammy.storage-0.6.2.min.js"
+                 "/public/js/lib/prettify/prettify.js"
+                 "/public/js/lib/json2.js"
+                 "/public/js/lib/swfobject.js"
+                 "/public/js/lib/FABridge.js"
+                 "/public/js/lib/web_socket.js"
                  "/public/js/message.js"
                  "/public/js/viewer.js")
-     (javascript-tag "$(document).ready(function() {WebSocket.__swfLocation = '/public/js/WebSocketMain.swf'; sammy_app = viewer.initSammy(); sammy_app.run('#/'); viewer.init(sammy_app);});")] 
+     (javascript-tag
+      (str 
+       "$(function() {"
+       "WebSocket.__swfLocation = '/public/js/lib/WebSocketMain.swf';"
+       "sammy_app = viewer.initSammy(); sammy_app.run('#/');"
+       "viewer.init(sammy_app);"
+       "});"))] 
       [:body#doc.yui-t4
        [:div#hd 
         [:a {:href "/#/"} [:h1 "AMQP Message Viewer"]]]
