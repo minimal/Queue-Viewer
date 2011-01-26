@@ -1,0 +1,3 @@
+[submodule "checkouts/compojure"]
+	path = checkouts/compojure
+	url = git@github.com:minimal/compojure.git
