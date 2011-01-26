@@ -8,33 +8,22 @@
 
 (ns site.main
   (:gen-class)
-  (:use [compojure])
-  (:use [clojure.contrib.json.write])
-  (:use clojure.contrib.command-line)
-  (:use clojure.contrib.duck-streams)
-  (:use [com.github.icylisper.rabbitmq])
-  (:use [site.messaging])
-  (:use [site.websocket])
-  (:import (com.rabbitmq.client
-             ConnectionParameters
-             Connection
-             Channel
-             AMQP
-             ConnectionFactory
-             Consumer
-             QueueingConsumer)))
+  (:use
+   [compojure]
+   [clojure.contrib.json.write]
+   [clojure.contrib.command-line] 
+   [site.messaging]
+   [site.websocket]))
 
-(def public-dir (atom ""))
+(def public-dir (atom "public"))
 
-;; "AMQP live queue viewer
+;; # AMQP live queue viewer
 
-;; Chris McDevitt
-;; "
- ;; (consume-poll mymap ((connect mymap) 1) {:prefetch 1}) 
-;; compojure part
+;; _Chris McDevitt_
 
-;; ========= Views =========
+;; ## Compojure part
 
+;; ### Views
 
 (defn html-doc 
   [title & body] 
@@ -42,8 +31,7 @@
    (doctype :html4) 
    [:html 
     [:head 
-     [:title title]
-     ;[:link {:type "text/css" :href "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" :rel "stylesheet"}]
+     [:title title] 
      (include-css  "http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css"
                    "/public/css/main.css"
                    "/public/css/form.css"
@@ -80,52 +68,30 @@
          [:div#sidebar ""]]]]]))
 
 
-;; ========= Controllers =========
-
-(defn get-waiting-messages
-  "get a list of the current messages on the queue"
-  [queueName]
-  (loop [msgs []]
-    (let [msg (get-one-msg queueName)]
-      (if-not msg
-        msgs
-        (recur (conj msgs msg))))))
-
-
-(defn poll-queue-for-messages
-  "Return any new messages as a json array"
-  [queueName]
-  (let [msgs (get-waiting-messages queueName)]
-    (json-str (for [msg msgs]
-                {:msg (String. (. msg getBody))
-                 :routing-key (String. (.. msg getEnvelope getRoutingKey))
-                 :id queueName}))))
+;; ### Controllers
 
 (defn setup-queue
-  "Setup a queue for a client with a routing key"
+  "Setup a queue for a client with a routing key  
+   TODO: move to message.clj"
   [routing-key exchange queueName]
-  (dosync (if-not (contains? @queues routing-key) ; add queue description
+  (dosync (if-not (contains? @queues routing-key)
             (alter queues assoc routing-key queueName)))
-                                       ; declare queue
-    
   (declare-queue queueName exchange routing-key)
   (json-str {:msg (str "Setup queue with key: " routing-key
                        " and exchange: " exchange)
              :status "success"
              :queue-id queueName}))
 
-;; ========= Routes =========
+;; ### Routes
 
 
 (defroutes queue-viewer
   (GET "/"
        (html-doc "Welcome"
                  [:div#main]))
-  
-  (GET "/queue/:id" [{:headers {"Content-Type" "application/json"}}]
-       (poll-queue-for-messages (params :id)))
   (PUT "/queue" [{:headers {"Content-Type" "application/json"}}]
-       (setup-queue (params :routing-key) (params :exchange) (params :queue-name)))
+       (setup-queue
+        (params :routing-key) (params :exchange) (params :queue-name)))
   (POST "/message"
         (publish-once (params :routing-key) (params :exchange)))
   (GET "/public/*" (or (serve-file @public-dir (params :*)) :next))
@@ -134,7 +100,7 @@
        (page-not-found)))
 
 
-;; ========= server =========
+;; ### Server
 
 (defn do-run-server
   [port]
