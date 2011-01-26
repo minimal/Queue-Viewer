@@ -1,11 +1,8 @@
-;; ========= amqp part =========
+;; # AMQP
 
 (ns site.messaging
-  (:use [compojure])
   (:use [clojure.contrib.json.write])
-  (:use [com.github.icylisper.rabbitmq])
-  (:import (com.rabbitmq.client
-             ConnectionParameters
+  (:import (com.rabbitmq.client 
              Connection
              Channel
              AMQP
@@ -13,44 +10,61 @@
              Consumer
              QueueingConsumer)))
 
-;; amqp config
-
-(defonce conn-map {:username "guest"
-                   :password "guest"
-                   :host "vsuse"
-                   :port 5672
-                   :virtual-host "/"
-                   ;:type "direct"
-                   :exchange "sorting-room"
-                   :queue "apo-box"
-                   :durable false
-                   :routing-key "atata"})
+;; ## Config
 
 (def basic-conn-map (atom {:username "guest"
                            :password "guest"
                            :host "dev.rabbitmq.com"
                            :port 5672
                            :virtual-host "/"
-                           :durable false
-                           }))
+                           :durable false}))
 
 (defonce queues (ref {}))  ; map of all queues {queue-id queue}
 
-;;(def connection (connect conn-map))
+(defn connect
+  [{:keys [username password virtual-host port #^String host]}]
+  (let [#^ConnectionFactory f (new ConnectionFactory)]
+    (doto f
+      (.setUsername username)
+      (.setPassword password)
+      (.setVirtualHost virtual-host)
+      (.setHost host)
+      (.setPort port))
+    (let [#^Connection conn (.newConnection f)]
+      [conn (.createChannel conn)])))
+
+(defn disconnect
+  [#^Channel ch #^Connection conn]
+  (.close ch)
+  (.close conn))
+
+(defn publish
+  ([{:keys [exchange routing-key]}
+     #^Channel ch
+     #^String m]
+     (let [msg-bytes (.getBytes m)]
+       (.basicPublish ch exchange routing-key nil msg-bytes)))
+  ([{:keys [exchange routing-key]}
+    mandatory
+    immediate
+     #^Channel ch
+     #^String m]
+     (let [msg-bytes (.getBytes m)]
+       (.basicPublish ch exchange routing-key mandatory immediate nil msg-bytes))))
+
 (def c (ref 0))
 (defn publish-once
   ([]
      (publish-once (conn-map :routing-key) (conn-map :exchange)))
   ([routing-key exchange] 
      (let [[conn channel] (connect @basic-conn-map)]
-       (dotimes [ n 1]
-         (dosync (alter c inc))
-                                        ;(bind-channel conn-map channel)
-         (println "rabbitmq publishing:" (format "message %d" @c) "to key: " routing-key)
-         (publish {:routing-key routing-key
-                   :exchange exchange}
-                  channel (format "message %d" @c)))
-       (disconnect channel conn))))
+       (try (dotimes [ n 1]
+              (dosync (alter c inc)) 
+              (println "rabbitmq publishing:" (format "message %d" @c) "to key: " routing-key)
+              (publish {:routing-key routing-key
+                        :exchange exchange}
+                       channel (format "message %d" @c)))
+            (finally  (disconnect channel conn))))))
 
 
 (defn get-one-msg
@@ -62,31 +76,31 @@
     (disconnect channel conn)
     response))
 
+(defn declare-passive-exchange
+  [ch exchange]
+  (.exchangeDeclarePassive ch exchange))
+
 (defn bind-channel-mod
   [{:keys [exchange type queue routing-key durable]}
    #^Channel ch]
-  (.exchangeDeclare ch exchange type durable)
-  ;;  (.queueDeclare ch queue durable)
-  (.queueDeclare ch queue false false false true {})
+  (declare-passive-exchange ch exchange)
+  (.queueDeclare ch queue false false true {})
   (.queueBind ch queue exchange routing-key))
 
 (defn declare-queue
   "Easily create a queue."
   [queueName exchange routing-key]
-  (let [[conn channel] (connect @basic-conn-map)
-        mappings (assoc @basic-conn-map
-                   :routing-key routing-key
-                   :exchange exchange
-                   :queue queueName
-                   :type "topic")]
-    (bind-channel-mod mappings channel)
-    (disconnect channel conn)
-    channel))
-
-(defn do-consume-poll
-  [queueName exchange routing-key]
-  (let [channel (declare-queue queueName exchange routing-key)]
-      (consume-poll @basic-conn-map channel)))
+  (try 
+    (let [[conn channel] (connect @basic-conn-map)
+          mappings (assoc @basic-conn-map
+                     :routing-key routing-key
+                     :exchange exchange
+                     :queue queueName
+                     :type "topic")]
+      (try (do
+             (bind-channel-mod mappings channel)
+             channel) 
+           (finally (disconnect channel conn))))))
 
 (defn consume-queue
   "Start consuming a queue to feed back to a websocket. Create a
@@ -101,8 +115,8 @@
         ;; temp values
         type "topic"
         durable false 
-        qd (.queueDeclare channel queue-name false false false true {})
-        _ (.exchangeDeclare channel exchange type durable)
+        qd (.queueDeclare channel queue-name false false true {})
+        _ (declare-passive-exchange channel exchange)
         _ (.queueBind channel queue-name exchange routing-key)
         qconsumer (QueueingConsumer. channel)]
     (.basicConsume channel queue-name qconsumer)

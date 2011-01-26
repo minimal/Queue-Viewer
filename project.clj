@@ -9,7 +9,7 @@
                  [org.eclipse.jetty/jetty-server "7.2.2.v20101205"]
                  [org.eclipse.jetty/jetty-servlet "7.2.2.v20101205"]
                  [org.eclipse.jetty/jetty-websocket "7.2.2.v20101205"]
-                 [com.rabbitmq/amqp-client "1.7.2"]]
+                 [com.rabbitmq/amqp-client "2.2.0"]]
   :dev-dependencies [[swank-clojure "1.2.1"
                       marginalia "0.3.0"]]
   :main site.main)
