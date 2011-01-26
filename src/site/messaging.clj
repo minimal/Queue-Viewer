@@ -109,7 +109,7 @@
   [{queue-name "name"
     exchange "exchange"
     routing-key "routing-key"}
-   callback pred]
+   callback pred rchannel]
   (println "start consume" queue-name)
   (let [[conn channel] (connect @basic-conn-map)
         ;; temp values
@@ -132,8 +132,8 @@
                                       :tag (.getDeliveryTag envelope)
                                       :isRedeliver (.isRedeliver envelope)
                                       :routing-key (String. (.getRoutingKey envelope))}
-                           :props (.getProperties delivery)
-                           }))))
+                           :props (.getProperties delivery)}
+                          rchannel))))
      (println "Disconnection rabbit")
      (catch Exception ex 
        (println queue-name "Consume thread caught exception:" ex))

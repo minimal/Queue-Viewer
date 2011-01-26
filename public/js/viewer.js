@@ -37,15 +37,21 @@ var viewer = function() {
         .animate({height: "toggle"}, 0).animate({height: "toggle"},
                                                 make_caller_with_tail(msgs));
     }
-      //console.log(msgs);
     addmsgs(msgs);
     prettyPrint();
     $(".prettyprint").removeClass('prettyprint')
   }
   function onWsMessage (msg) {
       // TODO: handle other type of message no just amqp for appending
-      // console.log(msg.data);
-    appendMessages([JSON.parse(msg.data).args]);
+    var parsed_msg = JSON.parse(msg.data);
+    console.log(msg);
+    if (parsed_msg.method === "amqp-msg") {
+      appendMessages([parsed_msg.params]);
+    }
+    else {
+      console.log(msg.data);
+      this.send(JSON.stringify({msg: "ack"}));
+    }
   }
 
   function onWsClose(msg) {
@@ -65,8 +71,9 @@ var viewer = function() {
     $('#ws_status').html('Websocket Opened').css("background-color", "#DCFFD6");
     var hash = window.location.hash.split('/').slice(1);    
     this.send(JSON.stringify({
-        _action: "start-queue",
-        args: {
+        "jsonrpc": "2.0",
+        method: "start-queue",
+        params: {
             name: hash[1],
             exchange: $('#entries div:first').attr("exchange"),
             "routing-key": $('#entries div:first').attr("routing-key")}}));
@@ -106,8 +113,7 @@ var viewer = function() {
   function initQueueButton(selector) {
     // Bind a button to poll the queue
     $(selector).live('click', function () {
-      var queue = window.location.hash.split('/')[2];
-        //console.log(queue);
+      var queue = window.location.hash.split('/')[2]; 
       getNewMessages(queue);
     });
   }
@@ -120,11 +126,9 @@ var viewer = function() {
     viewer.ws.onopen = onWsOpen;
     var queue = app.session("store") ["queues"][queue_name];
     $('#main').html('').haml(entries(queue_name, queue["routing-key"], queue["exchange"]));
-    return ws
-      //current_queue = pollNewMessages(queue_name);
+    return ws 
   }
-    /* Switch to monitoring a different queue without killing the
-    websocket */
+    // Switch to monitoring a different queue without killing the websocket
     function switchQueue(ws, queue_name, app) {
         var queue = app.session("store") ["queues"][queue_name];
         $('#main').html('').haml(entries(queue_name, queue["routing-key"], queue["exchange"]));
@@ -133,8 +137,8 @@ var viewer = function() {
         app.trigger("changed");
                     console.log("queue: "+ queue_name);
         ws.send(JSON.stringify({
-            _action: "start-queue",
-            args: {name: queue_name,
+            method: "start-queue",
+            params: {name: queue_name,
                    exchange: queue["exchange"],
                    "routing-key": queue["routing-key"]}}));
     }
@@ -147,13 +151,10 @@ var viewer = function() {
     function initSammy() {
       var app = $.sammy(function() {
       with(this) {
-        element_selector = '#main';
-          //use(Sammy.Template);
-        use(Sammy.Session);
-          //console.log('initing sammy');
+        element_selector = '#main'; 
+        use(Sammy.Session); 
           get('#/', function() {
-              $('#main').html('');
-              // $('#sidebar').haml(controls);
+              $('#main').html(''); 
               });
 
         
@@ -161,7 +162,7 @@ var viewer = function() {
         get('#/queue/:queue', function() {
                       with(this) {
             $(function() {
-                /* if no websocket is open start new queue with new websocket */
+                // if no websocket is open start new queue with new websocket 
                 if (viewer.ws === null ||  viewer.ws.readyState != 1 ) {
                     app.ws = startQueue(params['queue'], app);
                     $('title').html('Monitoring queue: ' + params['queue']);
@@ -192,7 +193,6 @@ var viewer = function() {
             log("posting:" + context);
             setupQueue(params["routing_key"], params["exchange"], params["queue_name"], app,
                        function() {redirect('#/');} ); 
-            //return false
           }
         });
 
@@ -209,12 +209,11 @@ var viewer = function() {
         })
 
         after( function(e, data) {
-          /* Clean up if required */
+          // Clean up if required 
             if (window.location.hash.split('/')[1] !== "queue") {
                 console.log("closing ws", ws, viewer.ws);
                 if (viewer.ws) {viewer.ws.close();}
-             }
-            //this.redirect('#/');
+             } 
         });
 
 

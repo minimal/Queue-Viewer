@@ -3,6 +3,7 @@
   :url "http://github.com/minimal/Queue-Viewer"
   :dependencies [[org.clojure/clojure "1.1.0"]
                  [org.clojure/clojure-contrib "1.1.0"]
+                 [matchure "0.10.1"]
                  [org.apache.commons.codec "1.4"]
                  [org.apache.commons/commons-io "1.3.2"]
                  [org.apache.commons.fileupload "1.2.1"]
