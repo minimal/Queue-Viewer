@@ -13,8 +13,8 @@
    [clojure.contrib.json.write]
    [clojure.contrib.command-line]
    [clojure.contrib.duck-streams]
-   [site.messaging]
-   [site.websocket]))
+   [site.messaging :only [queues declare-queue publish-once basic-conn-map]]
+   [site.websocket :only [do-run-websocket-server]]))
 
 (def public-dir (atom "public"))
 

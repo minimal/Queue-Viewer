@@ -1,7 +1,6 @@
 ;; # AMQP
 
 (ns site.messaging
-  (:use [clojure.contrib.json.write])
   (:import (com.rabbitmq.client 
              Connection
              Channel

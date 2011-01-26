@@ -1,9 +1,9 @@
 (ns site.websocket
-  (:use [site.messaging]
-        [clojure.stacktrace]
+  (:use [site.messaging :only [consume-queue]]
         [compojure.server.jetty :only [run-server]]
+        [clojure.stacktrace :only [print-stack-trace]]
         [clojure.contrib.json read write]
-        [matchure])
+        [matchure :only [defn-match]])
   (:import java.io.IOException
            javax.servlet.RequestDispatcher
            (javax.servlet.http
