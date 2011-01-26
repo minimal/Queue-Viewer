@@ -1,6 +1,7 @@
 (ns site.websocket
   (:use [site.messaging]
         [clojure.stacktrace]
+        [compojure.server.jetty :only [run-server]]
         [clojure.contrib.json read write]
         [matchure])
   (:import java.io.IOException

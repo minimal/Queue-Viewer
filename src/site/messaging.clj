@@ -17,6 +17,8 @@
                            :host "dev.rabbitmq.com"
                            :port 5672
                            :virtual-host "/"
+                           :exchange "amq.topic"
+                           :routing-key "test"
                            :durable false}))
 
 (defonce queues (ref {}))  ; map of all queues {queue-id queue}
@@ -55,7 +57,7 @@
 (def c (ref 0))
 (defn publish-once
   ([]
-     (publish-once (conn-map :routing-key) (conn-map :exchange)))
+     (publish-once (@basic-conn-map :routing-key) (@basic-conn-map :exchange)))
   ([routing-key exchange] 
      (let [[conn channel] (connect @basic-conn-map)]
        (try (dotimes [ n 1]

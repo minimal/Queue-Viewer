@@ -11,7 +11,8 @@
   (:use
    [compojure]
    [clojure.contrib.json.write]
-   [clojure.contrib.command-line] 
+   [clojure.contrib.command-line]
+   [clojure.contrib.duck-streams]
    [site.messaging]
    [site.websocket]))
 
