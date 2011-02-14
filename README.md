@@ -30,7 +30,7 @@ Requirements
 
 *Run*
 
-- Download and extract [queue-viewer-0.2-SNAPSHOT.tar.bz2](//github.com/downloads/minimal/Queue-Viewer/queue-viewer-0.2-SNAPSHOT.tar.bz2)
+- Download and extract [queue-viewer-0.2-SNAPSHOT.tar.bz2](//github.com/downloads/minimal/Queue-Viewer/queue-viewer-0.2-SNAPSHOT-2011-01-26.tar.bz2)
 - cd to the directory
 - type
         server -jar queue-viewer-0.2-SNAPSHOT-standalone.jar --rabbithost myrabbitserver --webport 9090 --staticdir /path-to-app/public
