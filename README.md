@@ -33,7 +33,7 @@ Requirements
 - Download and extract [queue-viewer-0.2-SNAPSHOT.tar.bz2](//github.com/downloads/minimal/Queue-Viewer/queue-viewer-0.2-SNAPSHOT-2011-01-26.tar.bz2)
 - cd to the directory
 - type
-        server -jar queue-viewer-0.2-SNAPSHOT-standalone.jar --rabbithost myrabbitserver --webport 9090 --staticdir /path-to-app/public
+        java -server -jar queue-viewer-0.2-SNAPSHOT-standalone.jar --rabbithost myrabbitserver --webport 9090 --staticdir /path-to-app/public
 - go to http://localhost:9090 in  a browser
 - click "All test"
 - click "Send test message" to test
