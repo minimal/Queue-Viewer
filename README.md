@@ -3,7 +3,7 @@ AMQP Queue Viewer
 
 A realtime in browser viewer for AMQP messages
 
-[Live Example](http://ec2-50-16-150-172.compute-1.amazonaws.com)
+[<del>Live Example</del>](http://ec2-50-16-150-172.compute-1.amazonaws.com) (currently down due to ec2 hardware failure)
 
 How?
 ----
