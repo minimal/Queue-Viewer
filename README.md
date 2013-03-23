@@ -3,7 +3,6 @@ AMQP Queue Viewer
 
 A realtime in browser viewer for AMQP messages
 
-[Live Example](http://ec2-50-19-163-166.compute-1.amazonaws.com)
 
 How?
 ----
@@ -24,7 +23,7 @@ Features
 - Remembers previous queues.
 - Uses web-socket-js for browsers without native websockets but with flash
 
-![screenshot](//github.com/downloads/minimal/Queue-Viewer/queue-viewer.png "Screenshot")
+![screenshot](https://github.com/downloads/minimal/Queue-Viewer/queue-viewer.png "Screenshot")
 
 Requirements
 ------------
